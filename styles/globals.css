@@ -1,14 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap');
+
+:root{
+  --accentColor: #f3007a;
+  --faintAccentColor: #f3007a2c;
+}
+
+*{
+  font-family: 'Noto Sans JP', sans-serif;
+}
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+main {
+  min-height: 100vh;
+  padding: 0% 10%;
+}
+
+h1{
+  color: var(--accentColor);
+  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
 a {
   color: inherit;
-  text-decoration: none;
+  text-decoration-color: var(--accentColor);
 }
 
 * {
