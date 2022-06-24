@@ -8,7 +8,7 @@ import KashidashiObject from '../../lib/KashidashiObject'
 import { FiEdit,FiHome } from "react-icons/fi";
 
 import {app} from '../../firebase'
-import { getFirestore, doc, getDoc, onSnapshot, arrayUnion, arrayRemove, updateDoc  } from "firebase/firestore";
+import { getFirestore, doc, setDoc,getDoc, onSnapshot, arrayUnion, arrayRemove, updateDoc  } from "firebase/firestore";
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { async } from '@firebase/util';
@@ -56,7 +56,7 @@ export default function ReservationRoom() {
     
     const reserveKashidashiObject = async(emoji,title,place,due,reservation) =>{
         if (reservationRoomId && user) {
-            let timeNow = moment().format('MMMM Do YYYY, h:mm:ss a');
+            let timeNow = moment().format('MMMM Do YYYY, h:mm a');
             await updateDoc(doc(db, "rooms", reservationRoomId), {
                 reservationObjects: arrayRemove({
                     emoji:emoji,
@@ -78,16 +78,31 @@ export default function ReservationRoom() {
                     reservedTime:timeNow,
                 })
             });
-            await updateDoc(doc(db, "user", user.uid), {
-                reservedObjects: arrayUnion({
-                    emoji:emoji,
-                    title:title,
-                    place:place,
-                    due:due,
-                    reservedTime:timeNow,
-                    reservedRoomId:reservationRoomId
-                })
-            });
+
+            const docSnap = await getDoc(doc(db, "user", user.uid));
+            if (docSnap.exists()) {
+                await updateDoc(doc(db, "user", user.uid), {
+                    reservedObjects: arrayUnion({
+                        emoji:emoji,
+                        title:title,
+                        place:place,
+                        due:due,
+                        reservedTime:timeNow,
+                        reservedRoomId:reservationRoomId
+                    })
+                });
+            } else {
+                await setDoc(doc(db, "user", user.uid), {
+                    reservedObjects: arrayUnion({
+                        emoji:emoji,
+                        title:title,
+                        place:place,
+                        due:due,
+                        reservedTime:timeNow,
+                        reservedRoomId:reservationRoomId
+                    })
+                });
+            }
         }
     }
 
@@ -106,14 +121,16 @@ export default function ReservationRoom() {
                             title={roomData.title}
                             subTitle={`${roomData.description}`}
                         >
+                            {user &&                            
+                                <Button
+                                    icon={<FiHome/>}
+                                    onClick={() => {router.push('/app')}}
+                                >
+                                    Dashboardに戻る
+                                </Button>
+                            }
                             {roomData.admin === user.uid && 
                                 <>
-                                    <Button
-                                        icon={<FiHome/>}
-                                        onClick={() => {router.push('/app')}}
-                                    >
-                                        Dashboardに戻る
-                                    </Button>
                                     <Button
                                         icon={<FiEdit/>}
                                         onClick={()=>router.push(`/admin/${reservationRoomId}`)}

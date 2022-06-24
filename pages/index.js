@@ -11,6 +11,7 @@ import {app} from '../firebase'
 import { getAuth, signInWithGoogle } from 'firebase/auth';
 import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import LoadingBar from 'react-top-loading-bar';
+import Footer from '../lib/Footer';
 
 export default function Home() {
   const router = useRouter();
@@ -27,8 +28,13 @@ export default function Home() {
       router.push('/app');
     }
   }, [user])
-  
 
+  const centerStyle = {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }
+  
   return (
     <>
       <LoadingBar
@@ -43,21 +49,73 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
+      <main style={centerStyle}>
         <AlignItems flexDirection={"column"}>
-          <h1 style={{fontSize:'3em',marginBottom:'0.5em'}}>
-            Kashidashi
-          </h1>
-          <h3>貸出しの管理をもっとシンプルに。</h3>
+          <div style={{padding:'2.5em'}}>
+            <AlignItems flexDirection={"column"}>
+              <img src={'/logo.jpg'} width="100px" height="100px" alt="logo" />
+              <h1 className="title">
+                Kashidashi
+              </h1>
+              <h3 style={{margin:0,color:'#777777'}}>貸出しの管理をもっとシンプルに。</h3>
+            </AlignItems>
+          </div>
           <AlignItems>
             <Button accentColor={true} icon={<FiLogIn/>} onClick={()=>signInWithGoogle()}>Googleでログイン</Button>
             <Button icon={<FiBookOpen/>} onClick={()=>router.push('/about')}>Kashidashiについて</Button>
           </AlignItems>
         </AlignItems>
-        <div>
-          <h1>About</h1>
-        </div>
       </main>
+      <main style={centerStyle}>
+        <AlignItems flexDirection={"column"} justifyContent={'center'} alignItems={'center'}>
+          <AlignItems flexDirection={"column"}>
+            <h1 style={{margin:0}}>使い方は2パターン</h1>
+            <h3 style={{margin:0}}>異なる場面において最適な方法で</h3>
+          </AlignItems>
+          <section className="grid-1fr-1fr" style={{marginTop:'2em'}}>
+            <div
+              style={{
+                background:'#f0f0f0',
+                padding:'1.5em',
+                borderRadius:'15px',
+                height:'fit-content'
+              }}
+            >
+              <h3 style={{margin:0,color:'var(--accentColor)'}}>Dispense Mode</h3>
+              <h2>ディスペンスモード</h2>
+              <p>ユーザーがサイトを利用し独自で予約する方法。実装例としては、教室にある本の貸し借りや教科書の貸し借りが考えられます。</p>
+              <img src={'/dispenseModeExample.png'} width="100%" height="auto" alt="logo" />
+            </div>
+            <div
+              style={{
+                background:'#f0f0f0',
+                padding:'1.5em',
+                borderRadius:'15px',
+                height:'fit-content'
+              }}
+            >
+              <h3 style={{margin:0,color:'var(--accentColor)'}}>Central Mode</h3>
+              <h2>セントラルモード</h2>
+              <p>アドミンのPCで貸し出しをする人がそれぞれ予約するシステム。実装例はパソコンが手に取れない状態（パソコンの貸し出し）等が考えられます。</p>
+              <img src={'/centralModeExample.png'} width="100%" height="auto" alt="logo" />
+            </div>
+          </section>
+        </AlignItems>
+      </main>
+      <main style={centerStyle}>
+        <AlignItems flexDirection={"column"}>
+          <h1 style={{margin:0}}>Gsuite使用の団体に最適</h1>
+          <h3 style={{margin:0}}>KashidashiはGmailのドメインでアクセス権限が自動的に指定されています</h3>
+          <p>
+            部屋を作成するアドミンのGmailメールアドレスのドメインで自動的に、意図する人のみアクセス可能。
+          </p>
+          <img src={'/domainAccessExample.png'} width="70%" height="auto" alt="logo" style={{border: '2px solid #f0f0f0'}}/>
+          <AlignItems></AlignItems>
+          {/* <p>※例えば@〇〇〇で貸し出しの部屋を作成した責任者がいると、同じ@〇〇〇のメールドメインを持った生徒がその部屋で貸し出しをすることができます</p> */}
+          <a href="https://pitch.com/public/044d2794-42e8-4e7a-a8ed-c3ddee03ebf1" target={'_blank'}>詳しくはPitchで見る</a>
+        </AlignItems>
+      </main>
+      <Footer/>
     </>
   )
 }

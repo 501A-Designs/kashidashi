@@ -18,9 +18,18 @@ main {
   padding: 0% 10%;
 }
 
+.title {
+  font-size:3em;
+  margin:0;
+  color:black;
+}
+
 h1{
   color: var(--accentColor);
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+}
+
+h1,h2,h3,h4,h5,h6{
+  font-family: Helvetica Neue, sans-serif;
 }
 
 a {
@@ -30,4 +39,50 @@ a {
 
 * {
   box-sizing: border-box;
+}
+
+img{
+  border-radius: 10px;
+}
+
+
+.grid-1fr-1fr,
+.grid-1fr-2fr{
+  display: grid;
+  gap: 1em;
+}
+
+@media screen and (min-width: 1301px) {
+  .grid-1fr-1fr{
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid-1fr-2fr{
+    grid-template-columns: 1fr 2fr;
+  }
+}
+@media screen and (min-width: 1001px) and (max-width: 1300px) {
+  .grid-1fr-1fr{
+    grid-template-columns: 1fr 1fr;
+  }
+  .grid-1fr-2fr{
+    grid-template-columns: 1fr 2fr;
+  }
+}
+@media screen and (min-width: 701px) and (max-width: 1000px) {
+  .grid-1fr-1fr,
+  .grid-1fr-2fr{
+    grid-template-columns: 1fr;
+  }
+}
+@media screen and (min-width: 401px) and (max-width: 700px) {
+  .grid-1fr-1fr,
+  .grid-1fr-2fr{
+    grid-template-columns: 1fr;
+  }
+}
+@media screen and (max-width: 400px) {
+  .grid-1fr-1fr,
+  .grid-1fr-2fr{
+    grid-template-columns: 1fr;
+  }
 }
