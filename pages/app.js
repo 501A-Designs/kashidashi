@@ -132,7 +132,7 @@ export default function App() {
                                     }}
                                 >
                                     <Input
-                                        placeholder="部屋の名前"
+                                        placeholder="部屋の名前　※他の部屋とかぶる事なくユニークなもの"
                                         value={roomInput}
                                         onChange={(e)=>setRoomInput(e.target.value)}
                                     />

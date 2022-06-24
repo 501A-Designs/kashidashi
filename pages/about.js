@@ -46,7 +46,13 @@ export default function About() {
           </p>
           <h1>使用法</h1>
           <h2>部屋を作成</h2>
+          <ol>
+            <li>Googleアカウントでログインした後、ダッシュボードを開き、左上にある「新しい部屋を作成」というボタンを押す</li>
+            <li>ボタンを押すとポップアップが表示され、部屋の名前と概要を入力することで新しい部屋を作成することができます</li>
+          </ol>
+          <p>※なお、タイトルを指定する際は今まで作成した部屋とは異なるものにしてください。</p>
           <h2>他の人に貸し出しをする</h2>
+          <p>アドミンは部屋を作成した後、他の人・自身の団体のメンバーに貸し出し管理を運用する必要があります。Kashidashiを使う場合二種類（ディスペンスモードとセントラルモード）の方法がございます。</p>
           <h3>ディスペンスモード</h3>
           <p>
             ディスペンスモードの仕組みについては<a href={pitchLink+'/ea304f9e-c745-4af5-8a8e-1407537c4cdd'} target={'_blank'}>こちら</a>のスライドでわかります。
@@ -99,22 +105,19 @@ export default function About() {
               <li>Kashidashiの新機能やアップデートに関する連絡</li>
           </ol>
           <h1>開発について</h1>
-          <h2>作るにあたって</h2>
-          <p>Kashidashiは私（501A）によって作成されたウェブアプリです。</p>
           <AlignItems justifyContent={'space-between'}>
-            <h3>開発状況・学び</h3>
+            <h2>開発状況・学び</h2>
             <Button
               onClick={() => router.push('https://zenn.dev/501a/scraps/4dd98c022a4577')}
             >
               Zennで開く
             </Button>
           </AlignItems>
-
           <h2>ソースコード</h2>
-          <p>興味ある方はGitHubからソースコードを閲覧することができます。</p>
+          <p>Kashidashiは私（501A）によって作成されたウェブアプリです。興味ある方はGitHubからソースコードを閲覧することができます。</p>
           <AlignItems>
-            <Button icon={<FiGithub/>}>GitHubでソースコードを見る</Button>
-            <Button icon={<FiTwitter/>}>開発者のツイッター</Button>
+            <Button icon={<FiGithub/>} onClick={()=>router.push('https://github.com/501A-Designs/kashidashi')}>GitHubでソースコードを見る</Button>
+            <Button icon={<FiTwitter/>} onClick={()=>router.push('https://twitter.com/Design501A')}>開発者のツイッター</Button>
           </AlignItems>
         </section>
       </main>
