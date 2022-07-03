@@ -17,6 +17,7 @@
     "react-data-grid": "^7.0.0-beta.13",
     "react-dom": "18.2.0",
     "react-firebase-hooks": "^5.0.3",
+    "react-full-screen": "^1.1.1",
     "react-icons": "^4.4.0",
     "react-modal": "^3.15.1",
     "react-toastify": "^9.0.4",

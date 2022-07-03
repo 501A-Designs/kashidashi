@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import React,{useEffect,useState} from 'react'
 
 import Header from '../../lib/Header'
-import KashidashiObject from '../../lib/KashidashiObject'
+import DispenseKashidashiObject from '../../lib/DispenseKashidashiObject'
 
 
 import { FiEdit,FiHome } from "react-icons/fi";
@@ -145,7 +145,7 @@ export default function ReservationRoom() {
                     <main style={{paddingTop:'2%'}}>
                         <section style={{display: 'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap: '1.5em'}}>
                             {roomData && roomData.reservationObjects.map(obj =>{
-                                return <KashidashiObject
+                                return <DispenseKashidashiObject
                                     key={obj.title}
                                     emoji={obj.emoji}
                                     title={obj.title}

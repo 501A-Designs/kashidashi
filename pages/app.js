@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import Header from '../lib/Header'
 import LargeButton from '../lib/buttons/LargeButton'
 import Button from '../lib/buttons/Button';
-import KashidashiObject from '../lib/KashidashiObject';
 import KashidashiRoom from '../lib/KashidashiRoom';
 import { modalStyle } from '../lib/style/modalStyle';
 
@@ -22,6 +21,7 @@ import LoginRequired from '../lib/scene/LoginRequired';
 import LoadingBar from 'react-top-loading-bar';
 import Borrowing from '../lib/Borrowing';
 import Nothing from '../lib/scene/Nothing'
+import Link from 'next/link';
 
 export default function App() {
     const router = useRouter();
@@ -80,17 +80,31 @@ export default function App() {
 
     const [roomInput, setRoomInput] = useState('');
     const [descriptionInput, setDescriptionInput] = useState('');
+    const [roomTypeInput, setRoomTypeInput] = useState('');
 
     const [newlyGeneratedRoomId, setNewlyGeneratedRoomId] = useState('')
 
     const createRoom = async () => {
-        const docRef = await addDoc(collection(db, "rooms"), {
-            admin: user.uid,
-            description: descriptionInput,
-            emailGroup: '@'+user.email.split('@')[1],
-            reservationObjects:[],
-            title: roomInput,
-        });
+        let docRef;
+        if (roomTypeInput === 'centralMode') {
+            docRef = await addDoc(collection(db, "rooms"), {
+                admin: user.uid,
+                description: descriptionInput,
+                reservationObjects:[],
+                roomType: roomTypeInput,
+                title: roomInput,
+            });
+        }
+        if (roomTypeInput === 'dispenseMode') {
+            docRef = await addDoc(collection(db, "rooms"), {
+                admin: user.uid,
+                description: descriptionInput,
+                emailGroup: '@'+user.email.split('@')[1],
+                reservationObjects:[],
+                roomType: roomTypeInput,
+                title: roomInput,
+            });
+        }
         setNewlyGeneratedRoomId(docRef.id)
         setModalType('visitCreatedRoom')
     }
@@ -107,8 +121,6 @@ export default function App() {
                 <>
                     <Modal
                         isOpen={modalIsOpen}
-                        // onAfterOpen={afterOpenModal}
-                        // onRequestClose={closeModal}
                         style={modalStyle}
                     >
                         {modalType !== 'visitCreatedRoom' && 
@@ -141,7 +153,31 @@ export default function App() {
                                         value={descriptionInput}
                                         onChange={(e)=>setDescriptionInput(e.target.value)}
                                     />
-                                    {roomInput && descriptionInput &&
+                                    <h3>モードの選択</h3>
+                                    <p style={{marginTop:'0'}}>
+                                        部屋を作成するにあたって自分の貸し出しに適したモードを選択することができます。それぞれのモードについては<Link href="https://pitch.com/public/044d2794-42e8-4e7a-a8ed-c3ddee03ebf1/e4d02efe-1192-4e1b-ab1a-dbd6290fb984"><a>こちら</a></Link>から見ることができます。
+                                    </p>
+                                    <div
+                                        style={{
+                                            display: 'grid',
+                                            gap: '0.5em',
+                                            gridTemplateColumns:'1fr 1fr'
+                                        }}
+                                    >
+                                        <Button
+                                            accentColor={roomTypeInput === 'dispenseMode' && true}
+                                            onClick={() => setRoomTypeInput('dispenseMode')}
+                                        >
+                                            ディスペンスモード
+                                        </Button>
+                                        <Button
+                                            accentColor={roomTypeInput === 'centralMode' && true}
+                                            onClick={() => setRoomTypeInput('centralMode')}
+                                        >
+                                            セントラルモード
+                                        </Button>
+                                    </div>
+                                    {roomInput && descriptionInput && roomTypeInput && 
                                         <Button
                                             accentColor={true}
                                             onClick={() => createRoom()}
@@ -157,8 +193,8 @@ export default function App() {
                                 justifyContent={'center'}
                                 flexDirection={'column'}
                             >
-                                <h2>部屋作成完了</h2>
-                                <p>新しく作成された部屋を見る</p>
+                                <h2>部屋の作成が完了しました</h2>
+                                <p>新しく作成された部屋に貸し出しするものを追加していこう。</p>
                                 <Button
                                     accentColor={true}
                                     onClick={() => router.push(`/admin/${newlyGeneratedRoomId}/`)}
@@ -357,6 +393,7 @@ export default function App() {
                                                         title={doc.data.title}
                                                         description={doc.data.description}
                                                         id={doc.id}
+                                                        roomType={doc.data.roomType}
                                                         emailGroup={doc.data.emailGroup}
                                                         reservationObjects={doc.data.reservationObjects}
                                                     />

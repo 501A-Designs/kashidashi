@@ -11,6 +11,7 @@ import {app} from '../firebase'
 import { getAuth, signInWithGoogle } from 'firebase/auth';
 import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import LoadingBar from 'react-top-loading-bar';
+
 import Footer from '../lib/Footer';
 
 export default function Home() {

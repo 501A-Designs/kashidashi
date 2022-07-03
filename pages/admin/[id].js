@@ -396,13 +396,15 @@ export default function AdminPannel() {
                                 >
                                     Dashboardに戻る
                                 </Button>
-                                <Button
-                                    icon={<FiPlay/>}
-                                    onClick={() => {router.push(`/reserve/${reservationRoomId}`)}}
-                                    accentColor={true}
-                                >
-                                    ユーザーとして利用
-                                </Button>
+                                {roomData.roomType === 'dispenseMode' &&
+                                    <Button
+                                        icon={<FiPlay/>}
+                                        onClick={() => {router.push(`/reserve/${reservationRoomId}`)}}
+                                        accentColor={true}
+                                    >
+                                        ユーザーとして利用
+                                    </Button>
+                                }
                             </Header>
                             <main style={{paddingTop:'2%'}}>
                                 <section style={{marginBottom:'1em'}}>
