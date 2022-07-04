@@ -215,7 +215,7 @@ export default function App() {
                                     }}
                                 >
                                     {userData ?
-                                        <>                                        
+                                        <>
                                             {userData.reservedObjects.length > 0 ? 
                                                 userData.reservedObjects.map(obj => {
                                                     return(

@@ -21,6 +21,7 @@ import LoginRequired from '../../lib/scene/LoginRequired';
 
 import LoadingBar from 'react-top-loading-bar'
 import Nothing from '../../lib/scene/Nothing';
+import Borrowing from '../../lib/Borrowing';
 
 export default function AdminPannel() {
     const router = useRouter();
@@ -35,7 +36,8 @@ export default function AdminPannel() {
     const [modalType, setModalType] = useState('');
     const [roomData, setRoomData] = useState();
 
-    const [emailGroup, setEmailGroup] = useState('')
+    const [aboutReservedBy,setAboutReservedBy] = useState('');
+
     const [roomTitleInput, setRoomTitleInput] = useState('');
     const [roomDescriptionInput, setRoomDescriptionInput] = useState('');
     const [roomAdminInput, setRoomAdminInput] = useState('');
@@ -60,7 +62,6 @@ export default function AdminPannel() {
         if (reservationRoomId) {  
             setProgress(20);
             onSnapshot(doc(db, "rooms", reservationRoomId), (doc) => {
-                setEmailGroup(doc.data().emailGroup)
                 setProgress(50);
                 if (doc.data().admin === user.uid) {
                     setRoomData(doc.data());
@@ -81,6 +82,12 @@ export default function AdminPannel() {
             unsub();
         }
     },[reservationRoomId, user])
+
+    const fetchReservedByUid =(uid)=>{
+        onSnapshot(doc(db, "user", uid), (doc) => {
+            setAboutReservedBy(doc.data().reservedObjects);
+        });
+    }
 
     const [emojiSelected, setEmojiSelected] = useState('');
     const [titleInput, setTitleInput] = useState('');
@@ -280,7 +287,7 @@ export default function AdminPannel() {
                                 </div>
                             </>
                         }
-                        {modalType !== 'settings' &&                 
+                        {modalType !== 'settings' && modalType !== 'aboutUser' &&                 
                             <>
                                 {modalType === 'new' && 
                                     <>
@@ -386,6 +393,26 @@ export default function AdminPannel() {
                                 </form>
                             </>
                         }
+                        {modalType === 'aboutUser' &&
+                            <>                            
+                                <h2>ユーザーの借り状況</h2>
+                                <p>ユーザーが他に何を借りているかの情報を安全のためアドミンが把握できるようになっています。</p>
+                                <>
+                                    {aboutReservedBy && aboutReservedBy.map(data => {
+                                        return (
+                                            <Borrowing
+                                                emoji={data.emoji}
+                                                title={data.title}
+                                                place={data.place}
+                                                due={data.due}
+                                                dateReserved={data.reservedTime}
+                                                onClick={() => router.push(`/reserve/${data.reservedRoomId}`)}
+                                            />
+                                        )
+                                    })}
+                                </>
+                            </>
+                        }
                     </Modal>
                     {roomData && 
                         <>
@@ -433,6 +460,7 @@ export default function AdminPannel() {
                                             title = {obj.title}
                                             place = {obj.place}
                                             due = {obj.due}
+                                            reservedTime = {obj.reservedTime}
                                             reserved = {obj.reserved}
                                             editButtonOnClick = {()=>{
                                                 setEmojiSelected(obj.emoji);
@@ -447,6 +475,12 @@ export default function AdminPannel() {
                                             removeButtonOnClick = {()=>removeKashidashiObject(obj.emoji,obj.title,obj.place,obj.due,obj.reserved,)}
                                             reservedBy={obj.reservedBy}
                                             reservedByUid={obj.reservedByUid}
+                                            reservedByEmail={obj.reservedByEmail}
+                                            aboutReservedByOnClick={()=>{
+                                                fetchReservedByUid(obj.reservedByUid);
+                                                setModalIsOpen(true);
+                                                setModalType('aboutUser')
+                                            }}
                                         />
                                     )
                                 })}
