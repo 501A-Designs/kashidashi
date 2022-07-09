@@ -65,7 +65,6 @@ export default function ReservationRoom() {
             reservedByUid:user && user.uid,
             reservedTime:timeNow,
         });
-        // const docSnap = await getDoc(doc(db, "user", user.uid));
         await setDoc(doc(db, `user/${user && user.uid}/reservedObjects/${docObject.id}/`), {
             emoji:docObject.data().emoji,
             title:docObject.data().title,

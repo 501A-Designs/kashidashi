@@ -79,8 +79,8 @@ export default function AdminPannel() {
         }
     }
 
-    const reviewsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
-    const [reservationObjects] = useCollection(reviewsCollectionRef);
+    const reservationObjectsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
+    const [reservationObjects] = useCollection(reservationObjectsCollectionRef);
 
     useEffect(() => {
         if (user) {
