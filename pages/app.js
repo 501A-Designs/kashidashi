@@ -22,58 +22,21 @@ import LoadingBar from 'react-top-loading-bar';
 import Borrowing from '../lib/Borrowing';
 import Nothing from '../lib/scene/Nothing'
 import Link from 'next/link';
+import { useCollection } from 'react-firebase-hooks/firestore';
 
 export default function App() {
     const router = useRouter();
     const [progress, setProgress] = useState(0);
-
     const auth = getAuth(app);
-    const [user, loading, error] = useAuthState(auth);
+    const [user] = useAuthState(auth);
 
     const db = getFirestore(app);
 
-    let roomsData = []
-    const [roomsArray, setRoomsArray] = useState();
-    const [userData, setUserData] = useState()
+    const userReservedCollectionRef = collection(db, `user/${user && user.uid}/reservedObjects/`);
+    const [userData] = useCollection(userReservedCollectionRef);
 
-    const fetchCollection = async () => {
-        if (user) {
-            const collectionRef = collection(db, "rooms");
-            const querySnapshot = await getDocs(query(collectionRef, where("admin", "==", user.uid)))
-            if (roomsData.length === 0) {                
-                querySnapshot.forEach((doc) => {
-                    roomsData.push(
-                        {
-                            data:doc.data(),
-                            id:doc.id
-                        }
-                    );
-                });
-            }
-            setProgress(100);
-            setRoomsArray(roomsData);
-            console.log(roomsData)
-        }
-    }
-
-    const fetchUserData = async () => {
-        if (user) {
-            const docRef = doc(db, "user", user.uid);
-            const docSnap = await getDoc(docRef);
-            if (docSnap.exists()) {
-                console.log("Document data:", docSnap.data());
-                setUserData(docSnap.data());
-            } else {
-                console.log("No such document!");
-            }
-        }
-    }
-
-    useEffect(() => {
-        setProgress(30);
-        fetchCollection();
-        fetchUserData();
-    }, [user])
+    const roomsCollectionRef = collection(db, "rooms");
+    const [roomsData] = useCollection(query(roomsCollectionRef, where("admin", "==", user && user.uid)))
     
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalType, setModalType] = useState('');
@@ -214,30 +177,19 @@ export default function App() {
                                         overflowX: 'auto'
                                     }}
                                 >
-                                    {userData ?
-                                        <>
-                                            {userData.reservedObjects.length > 0 ? 
-                                                userData.reservedObjects.map(obj => {
-                                                    return(
-                                                        <Borrowing
-                                                            emoji={obj.emoji}
-                                                            title={obj.title}
-                                                            place={obj.place}
-                                                            due={obj.due}
-                                                            dateReserved={obj.reservedTime}
-                                                            onClick={() => router.push(`/reserve/${obj.reservedRoomId}`)}
-                                                        />
-                                                    )
-                                                }):<Nothing icon={<FiFile/>}>
-                                                    <p>
-                                                        借りているものは全てここにリストとして表示されます。
-                                                        <br/>
-                                                        なお、現在借りているものはありません。
-                                                    </p>
-                                                </Nothing>
-                                            }
-                                        </>:
-                                        <Nothing icon={<FiFile/>}>
+                                    {userData && userData.docs.length > 0 ? 
+                                        userData.docs.map(obj => {
+                                            return(
+                                                <Borrowing
+                                                    emoji={obj.data().emoji}
+                                                    title={obj.data().title}
+                                                    place={obj.data().place}
+                                                    due={obj.data().due}
+                                                    dateReserved={obj.data().reservedTime}
+                                                    onClick={() => router.push(`/reserve/${obj.data().reservedRoomId}`)}
+                                                />
+                                            )
+                                        }):<Nothing icon={<FiFile/>}>
                                             <p>
                                                 借りているものは全てここにリストとして表示されます。
                                                 <br/>
@@ -286,7 +238,7 @@ export default function App() {
                                                 userData && 
                                                 <>
                                                     {
-                                                        userData.reservedObjects.length > 0 && 
+                                                        userData.docs.length > 0 && 
                                                         <div
                                                             style={{
                                                                 backgroundColor: 'var(--accentColor)',
@@ -298,7 +250,7 @@ export default function App() {
                                                             }}
                                                         >
                                                             <AlignItems justifyContent={'center'}>
-                                                                {userData.reservedObjects.length}
+                                                                {userData.docs.length}
                                                             </AlignItems>
                                                         </div>
                                                     }
@@ -383,31 +335,27 @@ export default function App() {
                                         height: 'fit-content',
                                     }}
                                 >
-                                {roomsArray &&
-                                    <>                                
-                                        {roomsArray.length > 0 ?
-                                            <>{roomsArray.map((doc) => {
-                                                return (
-                                                    <KashidashiRoom
-                                                        key={doc.id}
-                                                        title={doc.data.title}
-                                                        description={doc.data.description}
-                                                        id={doc.id}
-                                                        roomType={doc.data.roomType}
-                                                        emailGroup={doc.data.emailGroup}
-                                                        reservationObjects={doc.data.reservationObjects}
-                                                    />
-                                                )
-                                            })}</>:
-                                            <Nothing icon={<FiLayers/>}>
-                                                <p>
-                                                    作成されている貸出部屋はありません<br/>
-                                                    新しく作成するには左上にある「新しい部屋を作成」のボタンを押してください。
-                                                </p>
-                                            </Nothing>
-                                        }
-                                    </>
-                                }
+                                    {roomsData && roomsData.docs.length > 0 ?
+                                        <>{roomsData.docs.map((doc) => {
+                                            return (
+                                                <KashidashiRoom
+                                                    key={doc.id}
+                                                    title={doc.data().title}
+                                                    description={doc.data().description}
+                                                    id={doc.id}
+                                                    roomType={doc.data().roomType}
+                                                    emailGroup={doc.data().emailGroup}
+                                                    // reservationObjects={doc.data.reservationObjects}
+                                                />
+                                            )
+                                        })}</>:
+                                        <Nothing icon={<FiLayers/>}>
+                                            <p>
+                                                作成されている貸出部屋はありません<br/>
+                                                新しく作成するには左上にある「新しい部屋を作成」のボタンを押してください。
+                                            </p>
+                                        </Nothing>
+                                    }
                                 </div>
                             </section>
                         </section>

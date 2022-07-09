@@ -7,8 +7,9 @@ import { FiFile,FiLock,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSetti
 import DataGrid from 'react-data-grid';
 
 import {app} from '../../firebase'
-import { getFirestore, doc, getDoc, onSnapshot,updateDoc, arrayUnion, arrayRemove, deleteDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, onSnapshot,updateDoc, collection, arrayRemove, deleteDoc, addDoc, getDocs } from "firebase/firestore";
 import { getAuth, signOut } from 'firebase/auth';
+import { useCollection } from 'react-firebase-hooks/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { async } from '@firebase/util';
 
@@ -29,7 +30,7 @@ export default function AdminPannel() {
     const [progress, setProgress] = useState(0);
 
     const auth = getAuth(app);
-    const [user, loading, error] = useAuthState(auth);
+    const [user] = useAuthState(auth);
     const db = getFirestore(app);
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
@@ -43,25 +44,26 @@ export default function AdminPannel() {
     const [roomAdminInput, setRoomAdminInput] = useState('');
 
     const updateRoomInfo = async() =>{
-        if (user) {            
-            const docRef = doc(db, "rooms", reservationRoomId);
+        if (user) {
+            const docRef = doc(db, `rooms/${reservationRoomId}`);
             await updateDoc(docRef, {
                 title: roomTitleInput,
                 description: roomDescriptionInput,
                 admin: roomAdminInput === '' ? user.uid:roomAdminInput,
             });
         }
+        closeModal();
     }
 
     const deleteThisRoom = async () =>{
-        await deleteDoc(doc(db, "rooms", reservationRoomId));
+        await deleteDoc(doc(db, `rooms/${reservationRoomId}/`));
         router.push(`/app/`);
     }
 
     const unsub = () =>{
         if (reservationRoomId) {  
             setProgress(20);
-            onSnapshot(doc(db, "rooms", reservationRoomId), (doc) => {
+            onSnapshot(doc(db, `rooms/${reservationRoomId}`), (doc) => {
                 setProgress(50);
                 if (doc.data().admin === user.uid) {
                     setRoomData(doc.data());
@@ -77,18 +79,16 @@ export default function AdminPannel() {
         }
     }
 
+    const reviewsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
+    const [reservationObjects] = useCollection(reviewsCollectionRef);
+
     useEffect(() => {
         if (user) {
             unsub();
         }
     },[reservationRoomId, user])
 
-    const fetchReservedByUid =(uid)=>{
-        onSnapshot(doc(db, "user", uid), (doc) => {
-            setAboutReservedBy(doc.data().reservedObjects);
-        });
-    }
-
+    const [previousValue, setPreviousValue] = useState();
     const [emojiSelected, setEmojiSelected] = useState('');
     const [titleInput, setTitleInput] = useState('');
     const [placeInput, setPlaceInput] = useState('');
@@ -107,39 +107,40 @@ export default function AdminPannel() {
         emojiData = ['🛋','🧑‍🏫','🧑‍🔬','🧑‍💻','🧑‍💼','🧑‍🎨','💃','🤰','🗣','👤','👥']
     }
 
-    const [previousValue, setPreviousValue] = useState([]);
 
-    const removeKashidashiObject = async(emoji,title,place,due,reservation) =>{
-        if (reservationRoomId) {
-            await updateDoc(doc(db, "rooms", reservationRoomId), {
-                reservationObjects: arrayRemove({
-                    emoji:emoji,
-                    title:title,
-                    place:place,
-                    due:due,
-                    reserved:reservation
-                })
-            });
-        }
+    const removeKashidashiObject = async(docObject) =>{
+        await deleteDoc(doc(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${docObject.id}`));
     }
 
     const addKashidashiObject = async() =>{
-        if (reservationRoomId) { 
-            await updateDoc(doc(db, "rooms", reservationRoomId), {
-                reservationObjects: arrayUnion({
-                    emoji:emojiSelected,
-                    title:titleInput,
-                    place:placeInput,
-                    due:dueInputType === 'hours' ? dueInput:dueInput*24,
-                    reserved:false
-                })
-            });
-            setEmojiSelected('')
-            setTitleInput('')
-            setPlaceInput('')
-            setDueInputType('hours');
-            setDueInput(1)
-        }
+        await addDoc(collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`), {
+            emoji:emojiSelected,
+            title:titleInput,
+            place:placeInput,
+            due:dueInputType === 'hours' ? dueInput:dueInput*24,
+            reserved:false
+        });
+        closeModal();
+    }
+
+    const updateKashidashiObject = async() => {
+        await updateDoc(doc(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${previousValue.id}`), {
+            emoji:emojiSelected,
+            title:titleInput,
+            place:placeInput,
+            due:dueInputType === 'hours' ? dueInput:dueInput*24,
+        });
+        closeModal();
+    }
+    
+    const closeModal = () =>{
+        setPreviousValue();
+        setEmojiSelected('');
+        setTitleInput('');
+        setPlaceInput('');
+        setDueInputType('hours');
+        setDueInput(1);
+        setModalIsOpen(false);
     }
 
     function EmojiCarousel() {
@@ -199,14 +200,7 @@ export default function AdminPannel() {
                         style={modalStyle}
                     >
                         <Button
-                            onClick={()=>{
-                                setEmojiSelected('');
-                                setTitleInput('');
-                                setPlaceInput('');
-                                setDueInput(1);
-                                setDueInputType('hours');
-                                setModalIsOpen(false);
-                            }}
+                            onClick={()=>closeModal()}
                             icon={<FiXCircle/>}
                             float={'right'}
                         />
@@ -365,11 +359,7 @@ export default function AdminPannel() {
                                             {modalType === 'new' &&
                                                 <Button
                                                     accentColor={true}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        addKashidashiObject();
-                                                        setModalIsOpen(false);
-                                                    }}
+                                                    onClick={(e) => {e.preventDefault(); addKashidashiObject();}}
                                                 >
                                                     作成
                                                 </Button>
@@ -378,12 +368,7 @@ export default function AdminPannel() {
                                                 <Button
                                                     icon={<FiEdit/>}
                                                     accentColor={true}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        removeKashidashiObject(previousValue[0],previousValue[1],previousValue[2],previousValue[3],previousValue[4]);
-                                                        addKashidashiObject();
-                                                        setModalIsOpen(false);
-                                                    }}
+                                                    onClick={(e) => {e.preventDefault(); updateKashidashiObject();}}
                                                 >
                                                     変更を加える
                                                 </Button>
@@ -453,38 +438,37 @@ export default function AdminPannel() {
                                         </AlignItems>
                                     </AlignItems>
                                 </section>
-                                {roomData && roomData.reservationObjects.map(obj =>{
+                                {reservationObjects && reservationObjects.docs.map(doc =>{
                                     return (
                                         <KashidashiObjectRow
-                                            emoji = {obj.emoji}
-                                            title = {obj.title}
-                                            place = {obj.place}
-                                            due = {obj.due}
-                                            reservedTime = {obj.reservedTime}
-                                            reserved = {obj.reserved}
+                                            emoji = {doc.data().emoji}
+                                            title = {doc.data().title}
+                                            place = {doc.data().place}
+                                            due = {doc.data().due}
+                                            reserved = {doc.data().reserved}
+                                            removeButtonOnClick = {()=>removeKashidashiObject(doc)}
                                             editButtonOnClick = {()=>{
-                                                setEmojiSelected(obj.emoji);
-                                                setTitleInput(obj.title);
-                                                setPlaceInput(obj.place);
-                                                setDueInput(obj.due);
-                                                setDueInputType('hours');
-                                                setPreviousValue([obj.emoji,obj.title,obj.place,obj.due,obj.reserved]);
+                                                setModalIsOpen(true);
                                                 setModalType('edit');
-                                                setModalIsOpen(true);
+                                                setPreviousValue(doc);
+                                                setEmojiSelected(doc.data().emoji)
+                                                setTitleInput(doc.data().title)
+                                                setPlaceInput(doc.data().place)
+                                                setDueInput(doc.data().due)
                                             }}
-                                            removeButtonOnClick = {()=>removeKashidashiObject(obj.emoji,obj.title,obj.place,obj.due,obj.reserved,)}
-                                            reservedBy={obj.reservedBy}
-                                            reservedByUid={obj.reservedByUid}
-                                            reservedByEmail={obj.reservedByEmail}
-                                            aboutReservedByOnClick={()=>{
-                                                fetchReservedByUid(obj.reservedByUid);
-                                                setModalIsOpen(true);
-                                                setModalType('aboutUser')
-                                            }}
+                                            reservedTime = {doc.data().reservedTime}
+                                            reservedBy={doc.data().reservedBy}
+                                            reservedByUid={doc.data().reservedByUid}
+                                            reservedByEmail={doc.data().reservedByEmail}
+                                            // aboutReservedByOnClick={()=>{
+                                            //     fetchReservedByUid(doc.reservedByUid);
+                                            //     setModalIsOpen(true);
+                                            //     setModalType('aboutUser')
+                                            // }}
                                         />
                                     )
                                 })}
-                                {roomData && roomData.reservationObjects.length === 0 &&
+                                {reservationObjects && reservationObjects.docs.length === 0 &&
                                     <Nothing icon={<FiFile/>}>
                                         <p>新しく作成するには左上にある<br/>「新しく追加」のボタンを押してください。</p>
                                     </Nothing>

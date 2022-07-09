@@ -1,7 +1,7 @@
 import React from 'react'
 import Button from '../lib/buttons/Button'
 import Header from '../lib/Header'
-import { FiHome,FiGithub,FiTwitter } from "react-icons/fi";
+import { FiHome,FiGithub,FiTwitter, FiExternalLink } from "react-icons/fi";
 import { useRouter } from 'next/router';
 import AlignItems from '../lib/style/AlignItems';
 
@@ -108,6 +108,7 @@ export default function About() {
           <AlignItems justifyContent={'space-between'}>
             <h2>開発状況・学び</h2>
             <Button
+              icon={<FiExternalLink/>}
               onClick={() => router.push('https://zenn.dev/501a/scraps/4dd98c022a4577')}
             >
               Zennで開く

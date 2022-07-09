@@ -8,7 +8,7 @@ import DispenseKashidashiObject from '../../lib/DispenseKashidashiObject'
 import { FiEdit,FiHome } from "react-icons/fi";
 
 import {app} from '../../firebase'
-import { getFirestore, doc, setDoc,getDoc, onSnapshot, arrayUnion, arrayRemove, updateDoc  } from "firebase/firestore";
+import { getFirestore, doc, setDoc,getDoc, onSnapshot, arrayUnion, arrayRemove, updateDoc, collection  } from "firebase/firestore";
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { async } from '@firebase/util';
@@ -19,6 +19,7 @@ import LoadingBar from 'react-top-loading-bar'
 
 import moment from 'moment';
 import 'moment/locale/ja'
+import { useCollection } from 'react-firebase-hooks/firestore';
 
 export default function ReservationRoom() {
     const router = useRouter();
@@ -26,7 +27,7 @@ export default function ReservationRoom() {
     const [progress, setProgress] = useState(0)
 
     const auth = getAuth(app);
-    const [user, loading, error] = useAuthState(auth);
+    const [user] = useAuthState(auth);
     const db = getFirestore(app);
 
     const [roomData, setRoomData] = useState()
@@ -34,15 +35,15 @@ export default function ReservationRoom() {
     const unsub = () =>{
         if (reservationRoomId) { 
             setProgress(20);
-            onSnapshot(doc(db, "rooms", reservationRoomId), (doc) => {
+            onSnapshot(doc(db, `rooms/${reservationRoomId}/`), (doc) => {
                 setProgress(50);
-                if (doc.data().emailGroup.split('@')[1] === user.email.split('@')[1]) {
+                // if (doc.data().emailGroup.split('@')[1] === user.email.split('@')[1]) {
                     setRoomData(doc.data());
                     setProgress(100);
-                }else{
-                    setProgress(0);
-                    router.push('/app');
-                }
+                // }else{
+                //     setProgress(0);
+                //     router.push('/app');
+                // }
             });
         }
     }
@@ -53,57 +54,26 @@ export default function ReservationRoom() {
         }
     }, [reservationRoomId,user])
 
+    const reviewsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
+    const [reservationObjects] = useCollection(reviewsCollectionRef);
     
-    const reserveKashidashiObject = async(emoji,title,place,due,reservation) =>{
-        if (reservationRoomId && user) {
-            let timeNow = moment().format('MMMM Do YYYY, h:mm a');
-            await updateDoc(doc(db, "rooms", reservationRoomId), {
-                reservationObjects: arrayRemove({
-                    emoji:emoji,
-                    title:title,
-                    place:place,
-                    due:due,
-                    reserved:reservation
-                })
-            });
-            await updateDoc(doc(db, "rooms", reservationRoomId), {
-                reservationObjects: arrayUnion({
-                    emoji:emoji,
-                    title:title,
-                    place:place,
-                    due:due,
-                    reserved:true,
-                    reservedBy:user.displayName,
-                    reservedByUid:user.uid,
-                    reservedTime:timeNow,
-                })
-            });
-
-            const docSnap = await getDoc(doc(db, "user", user.uid));
-            if (docSnap.exists()) {
-                await updateDoc(doc(db, "user", user.uid), {
-                    reservedObjects: arrayUnion({
-                        emoji:emoji,
-                        title:title,
-                        place:place,
-                        due:due,
-                        reservedTime:timeNow,
-                        reservedRoomId:reservationRoomId
-                    })
-                });
-            } else {
-                await setDoc(doc(db, "user", user.uid), {
-                    reservedObjects: arrayUnion({
-                        emoji:emoji,
-                        title:title,
-                        place:place,
-                        due:due,
-                        reservedTime:timeNow,
-                        reservedRoomId:reservationRoomId
-                    })
-                });
-            }
-        }
+    const reserveKashidashiObject = async(docObject) =>{
+        let timeNow = moment().format('MMMM Do YYYY, h:mm a');
+        await updateDoc(doc(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${docObject.id}/`), {
+            reserved:true,
+            reservedBy:user && user.displayName,
+            reservedByUid:user && user.uid,
+            reservedTime:timeNow,
+        });
+        // const docSnap = await getDoc(doc(db, "user", user.uid));
+        await setDoc(doc(db, `user/${user && user.uid}/reservedObjects/${docObject.id}/`), {
+            emoji:docObject.data().emoji,
+            title:docObject.data().title,
+            place:docObject.data().place,
+            due:docObject.data().due,
+            reservedTime:timeNow,
+            reservedRoomId:reservationRoomId
+        });
     }
 
     return (
@@ -144,28 +114,23 @@ export default function ReservationRoom() {
                     }
                     <main style={{paddingTop:'2%'}}>
                         <section style={{display: 'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap: '1.5em'}}>
-                            {roomData && roomData.reservationObjects.map(obj =>{
+                            {reservationObjects && reservationObjects.docs.map(doc =>{
                                 return <DispenseKashidashiObject
-                                    key={obj.title}
-                                    emoji={obj.emoji}
-                                    title={obj.title}
-                                    place={obj.place}
-                                    due={obj.due}
-                                    reserved={obj.reserved}
+                                    key={doc.id}
+                                    // emoji={doc.data().emoji}
+                                    // title={doc.data().title}
+                                    // place={doc.data().place}
+                                    // due={doc.data().due}
+                                    // reserved={doc.data().reserved}
+                                    doc={doc}
                                     reserveOnClick={()=>{
-                                        alert(`${obj.title}を借りる`);
-                                        reserveKashidashiObject(
-                                            obj.emoji,
-                                            obj.title,
-                                            obj.place,
-                                            obj.due,
-                                            obj.reserved,
-                                        );
+                                        alert(`${doc.data().title}を借りる`);
+                                        reserveKashidashiObject(doc);
                                     }}
-                                    reservedBy={obj.reservedBy}
-                                    reservedByUid = {obj.reservedByUid}
-                                    reservedTime={obj.reservedTime}
-                                    reservedByCurrentUser={obj.reservedByUid === user.uid ? true:false}
+                                    reservedBy={doc.data().reservedBy}
+                                    reservedByUid = {doc.data().reservedByUid}
+                                    reservedTime={doc.data().reservedTime}
+                                    reservedByCurrentUser={doc.data().reservedByUid === user.uid ? true:false}
                                     reservationRoomId={reservationRoomId}
                                     currentUserObject={user}
                                 />
