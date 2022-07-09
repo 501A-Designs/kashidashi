@@ -53,7 +53,6 @@ export default function App() {
             docRef = await addDoc(collection(db, "rooms"), {
                 admin: user.uid,
                 description: descriptionInput,
-                reservationObjects:[],
                 roomType: roomTypeInput,
                 title: roomInput,
             });
@@ -63,7 +62,6 @@ export default function App() {
                 admin: user.uid,
                 description: descriptionInput,
                 emailGroup: '@'+user.email.split('@')[1],
-                reservationObjects:[],
                 roomType: roomTypeInput,
                 title: roomInput,
             });
@@ -97,7 +95,7 @@ export default function App() {
                             <>
                                 <h2>新規作成</h2>
                                 <p>
-                                    Kashidashiで貸し出しを行う場所は全て「部屋」と呼ばれています。新しい部屋を作成すると、貸し出しする物の追加・消去できる権限が与えられます。なお、作成する部屋は{user.email.split('@')[1]}に所属する人のみが閲覧できます。
+                                    貸し出しを行う場所は全て「部屋」と呼ばれています。新しい部屋を作成すると、貸し出しする物の追加・消去できる権限が与えられます。なお、作成する部屋は{user.email.split('@')[1]}に所属する人のみが閲覧できます。
                                 </p>
                                 <div
                                     style={{
@@ -120,6 +118,38 @@ export default function App() {
                                     <p style={{marginTop:'0'}}>
                                         部屋を作成するにあたって自分の貸し出しに適したモードを選択することができます。それぞれのモードについては<Link href="https://pitch.com/public/044d2794-42e8-4e7a-a8ed-c3ddee03ebf1/e4d02efe-1192-4e1b-ab1a-dbd6290fb984"><a>こちら</a></Link>から見ることができます。
                                     </p>
+                                    {roomTypeInput === 'dispenseMode' &&                                     
+                                        <div
+                                            style={{
+                                                color:'var(--accentColor)',
+                                                backgroundColor:'var(--faintAccentColor)',
+                                                padding: '1em',
+                                                borderRadius:'10px',
+                                                display: 'grid',
+                                                gridTemplateColumns:'1fr 9fr',
+                                                gap: '0.5em',
+                                            }}
+                                        >
+                                            {user.email.split('@')[1] === 'gmail.com' ? 
+                                                <>
+                                                    <AlignItems justifyContent={'center'}>
+                                                        <FiGlobe/>
+                                                    </AlignItems>
+                                                    <span style={{fontSize:'0.8em'}}>
+                                                        本アカウントはGsuiteでの管理下でないため、通常の@gmail.comのメールアドレスを持つ人が全て閲覧できます。
+                                                    </span>
+                                                </>:
+                                                <>
+                                                    <AlignItems justifyContent={'center'}>
+                                                        <FiUsers/>
+                                                    </AlignItems>
+                                                    <span style={{fontSize:'0.8em'}}>
+                                                        {user.email.split('@')[1]}のグループに所属している人のみ閲覧できます。
+                                                    </span>
+                                                </>
+                                            }
+                                        </div>
+                                    }
                                     <div
                                         style={{
                                             display: 'grid',
@@ -140,6 +170,7 @@ export default function App() {
                                             セントラルモード
                                         </Button>
                                     </div>
+
                                     {roomInput && descriptionInput && roomTypeInput && 
                                         <Button
                                             accentColor={true}
@@ -269,46 +300,6 @@ export default function App() {
                                     </AlignItems>
                                 </div>
                                 <div style={{display:'grid', gridTemplateColumns:'1fr', gap:'0.5em', paddingBottom: '2.5em'}}>
-                                    <Button
-                                        icon={<FiPlusSquare/>}
-                                        onClick={() => {
-                                            setModalType('create');
-                                            setModalIsOpen(true);
-                                        }}
-                                    >
-                                        新しい部屋を作成
-                                    </Button>
-                                    <div
-                                        style={{
-                                            color:'var(--accentColor)',
-                                            backgroundColor:'var(--faintAccentColor)',
-                                            padding: '1em',
-                                            marginBottom: '1em',
-                                            borderRadius:'10px',
-                                            display: 'grid',
-                                            gridTemplateColumns:'1fr 9fr',
-                                            gap: '0.5em',
-                                        }}
-                                    >
-                                        {user.email.split('@')[1] === 'gmail.com' ? 
-                                            <>
-                                                <AlignItems justifyContent={'center'}>
-                                                    <FiGlobe/>
-                                                </AlignItems>
-                                                <span style={{fontSize:'0.8em'}}>
-                                                    本アカウントはGsuiteでの管理下でないため、通常の@gmail.comのメールアドレスを持つ人が全て閲覧できます。
-                                                </span>
-                                            </>:
-                                            <>
-                                                <AlignItems justifyContent={'center'}>
-                                                    <FiUsers/>
-                                                </AlignItems>
-                                                <span style={{fontSize:'0.8em'}}>
-                                                    {user.email.split('@')[1]}のグループに所属している人のみ閲覧できます。
-                                                </span>
-                                            </>
-                                        }
-                                    </div>
                                     <AlignItems gap={'1em'}>
                                         <img
                                             src={user && user.photoURL}
@@ -346,7 +337,6 @@ export default function App() {
                                                     id={doc.id}
                                                     roomType={doc.data().roomType}
                                                     emailGroup={doc.data().emailGroup}
-                                                    // reservationObjects={doc.data.reservationObjects}
                                                 />
                                             )
                                         })}</>:
