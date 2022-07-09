@@ -23,6 +23,7 @@ import Borrowing from '../lib/Borrowing';
 import Nothing from '../lib/scene/Nothing'
 import Link from 'next/link';
 import { useCollection } from 'react-firebase-hooks/firestore';
+import IconBanner from '../lib/scene/IconBanner';
 
 export default function App() {
     const router = useRouter();
@@ -118,37 +119,17 @@ export default function App() {
                                     <p style={{marginTop:'0'}}>
                                         部屋を作成するにあたって自分の貸し出しに適したモードを選択することができます。それぞれのモードについては<Link href="https://pitch.com/public/044d2794-42e8-4e7a-a8ed-c3ddee03ebf1/e4d02efe-1192-4e1b-ab1a-dbd6290fb984"><a>こちら</a></Link>から見ることができます。
                                     </p>
-                                    {roomTypeInput === 'dispenseMode' &&                                     
-                                        <div
-                                            style={{
-                                                color:'var(--accentColor)',
-                                                backgroundColor:'var(--faintAccentColor)',
-                                                padding: '1em',
-                                                borderRadius:'10px',
-                                                display: 'grid',
-                                                gridTemplateColumns:'1fr 9fr',
-                                                gap: '0.5em',
-                                            }}
-                                        >
+                                    {roomTypeInput === 'dispenseMode' &&
+                                        <>
                                             {user.email.split('@')[1] === 'gmail.com' ? 
-                                                <>
-                                                    <AlignItems justifyContent={'center'}>
-                                                        <FiGlobe/>
-                                                    </AlignItems>
-                                                    <span style={{fontSize:'0.8em'}}>
-                                                        本アカウントはGsuiteでの管理下でないため、通常の@gmail.comのメールアドレスを持つ人が全て閲覧できます。
-                                                    </span>
-                                                </>:
-                                                <>
-                                                    <AlignItems justifyContent={'center'}>
-                                                        <FiUsers/>
-                                                    </AlignItems>
-                                                    <span style={{fontSize:'0.8em'}}>
-                                                        {user.email.split('@')[1]}のグループに所属している人のみ閲覧できます。
-                                                    </span>
-                                                </>
+                                                <IconBanner icon={<FiGlobe/>}>
+                                                    本アカウントはGsuiteでの管理下でないため、通常の@gmail.comのメールアドレスを持つ人が全て閲覧できます。
+                                                </IconBanner>:
+                                                <IconBanner icon={<FiUsers/>}>
+                                                    {user.email.split('@')[1]}のグループに所属している人のみ閲覧できます。
+                                                </IconBanner>
                                             }
-                                        </div>
+                                        </>
                                     }
                                     <div
                                         style={{

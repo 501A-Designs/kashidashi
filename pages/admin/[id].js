@@ -3,13 +3,13 @@ import React,{useState,useEffect,useRef} from 'react'
 import Button from '../../lib/buttons/Button';
 import Header from '../../lib/Header';
 
-import { FiFile,FiLock,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2 } from "react-icons/fi";
+import { FiFile,FiLock,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
 import DataGrid from 'react-data-grid';
 
 import {app} from '../../firebase'
 import { getFirestore, doc, getDoc, onSnapshot,updateDoc, collection, arrayRemove, deleteDoc, addDoc, getDocs } from "firebase/firestore";
 import { getAuth, signOut } from 'firebase/auth';
-import { useCollection } from 'react-firebase-hooks/firestore';
+import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { async } from '@firebase/util';
 
@@ -23,6 +23,7 @@ import LoginRequired from '../../lib/scene/LoginRequired';
 import LoadingBar from 'react-top-loading-bar'
 import Nothing from '../../lib/scene/Nothing';
 import Borrowing from '../../lib/Borrowing';
+import IconBanner from '../../lib/scene/IconBanner';
 
 export default function AdminPannel() {
     const router = useRouter();
@@ -35,7 +36,6 @@ export default function AdminPannel() {
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalType, setModalType] = useState('');
-    const [roomData, setRoomData] = useState();
 
     const [aboutReservedBy,setAboutReservedBy] = useState('');
 
@@ -60,33 +60,18 @@ export default function AdminPannel() {
         router.push(`/app/`);
     }
 
-    const unsub = () =>{
-        if (reservationRoomId) {  
-            setProgress(20);
-            onSnapshot(doc(db, `rooms/${reservationRoomId}`), (doc) => {
-                setProgress(50);
-                if (doc.data().admin === user.uid) {
-                    setRoomData(doc.data());
-                    setRoomTitleInput(doc.data().title);
-                    setRoomDescriptionInput(doc.data().description);
-                    setRoomAdminInput(doc.data().admin);
-                    setProgress(100);
-                }else{
-                    setProgress(0);
-                    router.push('/app');
-                }
-            });
-        }
-    }
+    const roomDataDocumentRef = doc(db, `rooms/${reservationRoomId && reservationRoomId}/`)
+    const [roomData] =  useDocument(roomDataDocumentRef);
 
     const reservationObjectsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
     const [reservationObjects] = useCollection(reservationObjectsCollectionRef);
+    const [reservedStatus, setReservedStatus] = useState(0);
 
     useEffect(() => {
-        if (user) {
-            unsub();
-        }
-    },[reservationRoomId, user])
+        reservationObjects && reservationObjects.docs.map(doc =>{
+            doc.data().reserved && setReservedStatus(true);
+        })
+    },[reservationObjects])
 
     const [previousValue, setPreviousValue] = useState();
     const [emojiSelected, setEmojiSelected] = useState('');
@@ -259,7 +244,7 @@ export default function AdminPannel() {
                                     </AlignItems>
                                     <Button
                                         accentColor={true}
-                                        icon={<FiLock/>}
+                                        icon={<FiRefreshCw/>}
                                         onClick={() => updateRoomInfo()}
                                     >
                                         更新
@@ -270,15 +255,20 @@ export default function AdminPannel() {
                                         marginTop:'0.5em'
                                     }}
                                 >
-                                    <AlignItems justifyContent={'space-between'}>
-                                        <p>一度消去すると復旧することはできません</p>
-                                        <Button
-                                            icon={<FiTrash2/>}
-                                            onClick={() => deleteThisRoom()}
-                                        >
-                                            部屋を消去
-                                        </Button>
-                                    </AlignItems>
+                                    {reservedStatus ?
+                                        <IconBanner icon={<FiAlertTriangle/>}>
+                                            この部屋を消去するには、貸し出したもの全てが返却される必要があります。
+                                        </IconBanner>:
+                                        <AlignItems justifyContent={'space-between'}>
+                                            <p>一度消去すると復旧することはできません</p>
+                                            <Button
+                                                icon={<FiTrash2/>}
+                                                onClick={() => deleteThisRoom()}
+                                            >
+                                                部屋を消去
+                                            </Button>
+                                        </AlignItems>
+                                    }
                                 </div>
                             </>
                         }
@@ -403,14 +393,14 @@ export default function AdminPannel() {
                     </Modal>
                     {roomData && 
                         <>
-                            <Header title={'編集'} subTitle={`「${roomData && roomData.title}」を編集`}>
+                            <Header title={'編集'} subTitle={`「${roomData && roomData.data().title}」を編集`}>
                                 <Button
                                     icon={<FiHome/>}
                                     onClick={() => {router.push('/app')}}
                                 >
                                     Dashboardに戻る
                                 </Button>
-                                {roomData.roomType === 'dispenseMode' &&
+                                {roomData.data().roomType === 'dispenseMode' &&
                                     <Button
                                         icon={<FiPlay/>}
                                         onClick={() => {router.push(`/reserve/${reservationRoomId}`)}}
@@ -433,7 +423,13 @@ export default function AdminPannel() {
                                         <AlignItems>
                                             <Button
                                                 icon={<FiSettings/>}
-                                                onClick={() => {setModalIsOpen(true); setModalType('settings')}}
+                                                onClick={() => {
+                                                    setModalIsOpen(true);
+                                                    setModalType('settings')
+                                                    setRoomTitleInput(roomData.data().title);
+                                                    setRoomDescriptionInput(roomData.data().description);
+                                                    setRoomAdminInput(roomData.data().admin);
+                                                }}
                                             >
                                                 設定
                                             </Button>
