@@ -163,6 +163,7 @@ export default function AdminPannel() {
             >
                 {emojiData && emojiData.map(emoji => 
                     <div
+                        key={emoji}
                         style={{
                             background:`${emojiSelected === emoji ? 'var(--faintAccentColor)':'#f0f0f0'}`,
                             color: `${emojiSelected === emoji ? 'var(--accentColor)':'black'}`,
@@ -386,6 +387,7 @@ export default function AdminPannel() {
                                     {aboutReservedBy && aboutReservedBy.map(data => {
                                         return (
                                             <Borrowing
+                                                key={data.id}
                                                 emoji={data.emoji}
                                                 title={data.title}
                                                 place={data.place}
@@ -441,11 +443,8 @@ export default function AdminPannel() {
                                 {reservationObjects && reservationObjects.docs.map(doc =>{
                                     return (
                                         <KashidashiObjectRow
-                                            emoji = {doc.data().emoji}
-                                            title = {doc.data().title}
-                                            place = {doc.data().place}
-                                            due = {doc.data().due}
-                                            reserved = {doc.data().reserved}
+                                            key={doc.id}
+                                            docObject={doc}
                                             removeButtonOnClick = {()=>removeKashidashiObject(doc)}
                                             editButtonOnClick = {()=>{
                                                 setModalIsOpen(true);
@@ -456,10 +455,6 @@ export default function AdminPannel() {
                                                 setPlaceInput(doc.data().place)
                                                 setDueInput(doc.data().due)
                                             }}
-                                            reservedTime = {doc.data().reservedTime}
-                                            reservedBy={doc.data().reservedBy}
-                                            reservedByUid={doc.data().reservedByUid}
-                                            reservedByEmail={doc.data().reservedByEmail}
                                             // aboutReservedByOnClick={()=>{
                                             //     fetchReservedByUid(doc.reservedByUid);
                                             //     setModalIsOpen(true);

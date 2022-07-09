@@ -181,6 +181,7 @@ export default function App() {
                                         userData.docs.map(obj => {
                                             return(
                                                 <Borrowing
+                                                    key={obj.id}
                                                     emoji={obj.data().emoji}
                                                     title={obj.data().title}
                                                     place={obj.data().place}

@@ -13,6 +13,7 @@ import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import LoadingBar from 'react-top-loading-bar';
 
 import Footer from '../lib/Footer';
+import Link from 'next/link';
 
 export default function Home() {
   const router = useRouter();
@@ -113,7 +114,9 @@ export default function Home() {
           <img src={'/domainAccessExample.png'} width="70%" height="auto" alt="logo" style={{border: '2px solid #f0f0f0'}}/>
           <AlignItems></AlignItems>
           {/* <p>※例えば@〇〇〇で貸し出しの部屋を作成した責任者がいると、同じ@〇〇〇のメールドメインを持った生徒がその部屋で貸し出しをすることができます</p> */}
-          <a href="https://pitch.com/public/044d2794-42e8-4e7a-a8ed-c3ddee03ebf1" target={'_blank'}>詳しくはPitchで見る</a>
+          <Link href="https://pitch.com/public/044d2794-42e8-4e7a-a8ed-c3ddee03ebf1" target={'_blank'} rel="noreferrer">
+            <a>詳しくはPitchで見る</a>
+          </Link>
         </AlignItems>
       </main>
       <Footer/>

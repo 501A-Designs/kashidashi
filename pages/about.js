@@ -8,6 +8,7 @@ import AlignItems from '../lib/style/AlignItems';
 import axios from 'axios'
 import useSWR from 'swr'
 import Footer from '../lib/Footer';
+import Link from 'next/link';
 
 export default function About() {
   const router = useRouter();
@@ -42,7 +43,7 @@ export default function About() {
               <li>Gsuite使用の団体にピッタリなツール</li>
               <li>二種類の使用法</li>
             </ul>
-            他にも、Kashidashiに関する情報は視覚的に理解できるために<a href={pitchLink} target={'_blank'}>スライド</a>でもまとめたので興味があれば是非見てください！
+            他にも、Kashidashiに関する情報は視覚的に理解できるために<Link href={pitchLink} target="_blank" rel="noreferrer"><a>スライド</a></Link>でもまとめたので興味があれば是非見てください！
           </p>
           <h1>使用法</h1>
           <h2>部屋を作成</h2>
@@ -55,15 +56,15 @@ export default function About() {
           <p>アドミンは部屋を作成した後、他の人・自身の団体のメンバーに貸し出し管理を運用する必要があります。Kashidashiを使う場合二種類（ディスペンスモードとセントラルモード）の方法がございます。</p>
           <h3>ディスペンスモード</h3>
           <p>
-            ディスペンスモードの仕組みについては<a href={pitchLink+'/ea304f9e-c745-4af5-8a8e-1407537c4cdd'} target={'_blank'}>こちら</a>のスライドでわかります。
+            ディスペンスモードの仕組みについては<Link href={pitchLink+'/ea304f9e-c745-4af5-8a8e-1407537c4cdd'} target={'_blank'} rel="noreferrer"><a>こちら</a></Link>のスライドでわかります。
           </p>
           <h3>セントラルモード</h3>
           <p>
-            セントラルモードの仕組みについては<a href={pitchLink+'/d28358b2-2b7b-4e3a-aef9-ea24d1f00838'} target={'_blank'}>こちら</a>のスライドでわかります。
+            セントラルモードの仕組みについては<Link href={pitchLink+'/d28358b2-2b7b-4e3a-aef9-ea24d1f00838'} target={'_blank'} rel="noreferrer"><a>こちら</a></Link>のスライドでわかります。
           </p>
           <h2>アクセス制限</h2>
           <p>
-            新しい部屋を作るとデフォルトでKashidashiにログインしている人誰もがアクセスできるようになっています。Gsuiteをご使用の団体様はご自分の独自メールドメイン（@gmail.comではなく@団体名.jp等のメールアドレス）でアクセスの許可を制限することができます。詳しくは<a>スライド</a>を読むと良いです。
+            新しい部屋を作るとデフォルトでKashidashiにログインしている人誰もがアクセスできるようになっています。Gsuiteをご使用の団体様はご自分の独自メールドメイン（@gmail.comではなく@団体名.jp等のメールアドレス）でアクセスの許可を制限することができます。詳しくは<Link href={pitchLink} rel="noreferrer"><a>スライド</a></Link>を読むと良いです。
           </p>
           <h1>ユーザー様に関する事</h1>
           <h2>プライバシーポリシー</h2>
@@ -94,7 +95,7 @@ export default function About() {
           <h5>Firebase (Google Cloud Platform)</h5>
           <p>当サイトは、Firebase (Google Cloud Platform) を通し、ユーザーのアカウント・時間割表のデータを管理させていただいています。ログインし使用する際はFirebaseにデータが保存されます。</p>
           <p>
-              ※Google Inc.の<a href="https://policies.google.com/?hl=ja">プライバシーポリシー</a>
+              ※Google Inc.の<Link href="https://policies.google.com/?hl=ja" rel="noreferrer"><a>プライバシーポリシー</a></Link>
           </p>
           <h3>これらの情報収集の目的について</h3>
           <p>
