@@ -391,7 +391,7 @@ export default function AdminPannel() {
                             </>
                         }
                     </Modal>         
-                    {roomData && reservationObjects && roomData.data().emailGroup.split('@')[1] === user.email.split('@')[1] ? 
+                    {roomData && reservationObjects && roomData.data().admin === user.uid ? 
                         <>
                             <Header title={'編集'} subTitle={`「${roomData && roomData.data().title}」を編集`}>
                                 <Button
@@ -466,7 +466,7 @@ export default function AdminPannel() {
                                 }
                             </main>
                         </>:<Nothing icon={<FiShield/>}>
-                            <p>この部屋を作成したアドミンと同じGsuiteグループに所属していないため、アクセスできません。</p>
+                            <p>アドミンしかアクセスできません。</p>
                         </Nothing>
                     }
                 </>:<LoginRequired/>
