@@ -15,6 +15,7 @@
     "next": "12.1.6",
     "react": "18.2.0",
     "react-data-grid": "^7.0.0-beta.13",
+    "react-device-detect": "^2.2.2",
     "react-dom": "18.2.0",
     "react-firebase-hooks": "^5.0.3",
     "react-full-screen": "^1.1.1",

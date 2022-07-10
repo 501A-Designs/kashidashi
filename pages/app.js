@@ -239,7 +239,7 @@ export default function App() {
                                                 setModalIsOpen(true);
                                             }}
                                         >
-                                            新しい部屋を作成
+                                            部屋を作成
                                         </LargeButton>
                                         <LargeButton
                                             icon={<FiInbox/>}

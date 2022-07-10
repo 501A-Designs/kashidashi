@@ -11,6 +11,7 @@ import {app} from '../firebase'
 import { getAuth, signInWithGoogle } from 'firebase/auth';
 import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth';
 import LoadingBar from 'react-top-loading-bar';
+import {isBrowser} from 'react-device-detect';
 
 import Footer from '../lib/Footer';
 import Link from 'next/link';
@@ -63,7 +64,9 @@ export default function Home() {
             </AlignItems>
           </div>
           <AlignItems>
-            <Button accentColor={true} icon={<FiLogIn/>} onClick={()=>signInWithGoogle()}>Googleでログイン</Button>
+            {isBrowser &&
+              <Button accentColor={true} icon={<FiLogIn/>} onClick={()=>signInWithGoogle()}>Googleでログイン</Button>
+            }
             <Button icon={<FiBookOpen/>} onClick={()=>router.push('/about')}>Kashidashiについて</Button>
           </AlignItems>
         </AlignItems>

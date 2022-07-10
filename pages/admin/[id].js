@@ -3,7 +3,7 @@ import React,{useState,useEffect,useRef} from 'react'
 import Button from '../../lib/buttons/Button';
 import Header from '../../lib/Header';
 
-import { FiFile,FiLock,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw } from "react-icons/fi";
+import { FiFile,FiLock,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw, FiShield } from "react-icons/fi";
 import DataGrid from 'react-data-grid';
 
 import {app} from '../../firebase'
@@ -65,7 +65,7 @@ export default function AdminPannel() {
 
     const reservationObjectsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
     const [reservationObjects] = useCollection(reservationObjectsCollectionRef);
-    const [reservedStatus, setReservedStatus] = useState(0);
+    const [reservedStatus, setReservedStatus] = useState(false);
 
     useEffect(() => {
         reservationObjects && reservationObjects.docs.map(doc =>{
@@ -391,7 +391,7 @@ export default function AdminPannel() {
                             </>
                         }
                     </Modal>
-                    {roomData && 
+                    {roomData && reservationObjects && roomData.data().emailGroup.split('@')[1] === user.email.split('@')[1] ? 
                         <>
                             <Header title={'編集'} subTitle={`「${roomData && roomData.data().title}」を編集`}>
                                 <Button
@@ -436,7 +436,7 @@ export default function AdminPannel() {
                                         </AlignItems>
                                     </AlignItems>
                                 </section>
-                                {reservationObjects && reservationObjects.docs.map(doc =>{
+                                {reservationObjects.docs.map(doc =>{
                                     return (
                                         <KashidashiObjectRow
                                             key={doc.id}
@@ -459,13 +459,15 @@ export default function AdminPannel() {
                                         />
                                     )
                                 })}
-                                {reservationObjects && reservationObjects.docs.length === 0 &&
+                                {reservationObjects.docs.length === 0 &&
                                     <Nothing icon={<FiFile/>}>
                                         <p>新しく作成するには左上にある<br/>「新しく追加」のボタンを押してください。</p>
                                     </Nothing>
                                 }
                             </main>
-                        </>
+                        </>:<Nothing icon={<FiShield/>}>
+                            <p>この部屋を作成したアドミンと同じGsuiteグループに所属していないため、アクセスできません。</p>
+                        </Nothing>
                     }
                 </>:<LoginRequired/>
             }
