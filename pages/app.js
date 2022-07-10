@@ -53,24 +53,13 @@ export default function App() {
 
 
     const createRoom = async () => {
-        let docRef;
-        if (roomTypeInput === 'centralMode') {
-            docRef = await addDoc(collection(db, "rooms"), {
-                admin: user.uid,
-                description: descriptionInput,
-                roomType: roomTypeInput,
-                title: roomInput,
-            });
-        }
-        if (roomTypeInput === 'dispenseMode') {
-            docRef = await addDoc(collection(db, "rooms"), {
-                admin: user.uid,
-                description: descriptionInput,
-                emailGroup: '@'+user.email.split('@')[1],
-                roomType: roomTypeInput,
-                title: roomInput,
-            });
-        }
+        let docRef = await addDoc(collection(db, "rooms"), {
+            admin: user.uid,
+            description: descriptionInput,
+            emailGroup: '@'+user.email.split('@')[1],
+            roomType: roomTypeInput,
+            title: roomInput,
+        });
         setNewlyGeneratedRoomId(docRef.id)
         setModalType('visitCreatedRoom')
     }

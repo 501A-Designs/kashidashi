@@ -54,12 +54,15 @@ export default function AdminPannel() {
     }
 
     const deleteThisRoom = async () =>{
-        await deleteDoc(doc(db, `rooms/${reservationRoomId}/`));
-        router.push(`/app/`);
+        if (confirm('一度部屋を消去すると復旧することは出来ません。')) {
+            router.push(`/app/`);
+            await deleteDoc(doc(db, `rooms/${reservationRoomId}/`));
+        }
     }
 
     const roomDataDocumentRef = doc(db, `rooms/${reservationRoomId && reservationRoomId}/`)
     const [roomData] =  useDocument(roomDataDocumentRef);
+    console.log(roomData);
 
     const reservationObjectsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
     const [reservationObjects] = useCollection(reservationObjectsCollectionRef);
@@ -176,7 +179,7 @@ export default function AdminPannel() {
                 onLoaderFinished={() => setProgress(0)}
                 waitingTime={500}
             />
-            {user ?            
+            {user ?
                 <>
                     <Modal
                         isOpen={modalIsOpen}
@@ -387,7 +390,7 @@ export default function AdminPannel() {
                                 </>
                             </>
                         }
-                    </Modal>
+                    </Modal>         
                     {roomData && reservationObjects && roomData.data().emailGroup.split('@')[1] === user.email.split('@')[1] ? 
                         <>
                             <Header title={'編集'} subTitle={`「${roomData && roomData.data().title}」を編集`}>
