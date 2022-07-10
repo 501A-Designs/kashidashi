@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React,{useEffect,useState} from 'react'
+import React,{useState} from 'react'
 
 import Header from '../../lib/Header'
 import DispenseKashidashiObject from '../../lib/DispenseKashidashiObject'
@@ -8,10 +8,9 @@ import DispenseKashidashiObject from '../../lib/DispenseKashidashiObject'
 import { FiEdit,FiHome, FiShield } from "react-icons/fi";
 
 import {app} from '../../firebase'
-import { getFirestore, doc, setDoc,getDoc, onSnapshot, arrayUnion, arrayRemove, updateDoc, collection  } from "firebase/firestore";
-import { getAuth, signOut } from 'firebase/auth';
+import { getFirestore, doc, setDoc, updateDoc, collection  } from "firebase/firestore";
+import { getAuth } from 'firebase/auth';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { async } from '@firebase/util';
 import Button from '../../lib/buttons/Button';
 import LoginRequired from '../../lib/scene/LoginRequired';
 
@@ -22,6 +21,9 @@ import 'moment/locale/ja'
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import Nothing from '../../lib/scene/Nothing';
 
+import { useMediaQuery } from 'react-responsive'
+
+
 export default function ReservationRoom() {
     const router = useRouter();
     const reservationRoomId = router.query.id;
@@ -30,7 +32,7 @@ export default function ReservationRoom() {
     const auth = getAuth(app);
     const [user] = useAuthState(auth);
     const db = getFirestore(app);
-    
+
     const roomDataDocumentRef = doc(db, `rooms/${reservationRoomId && reservationRoomId}/`)
     const [roomData] =  useDocument(roomDataDocumentRef);
 
@@ -54,6 +56,9 @@ export default function ReservationRoom() {
             reservedRoomId:reservationRoomId
         });
     }
+
+    const isSmallScreen = useMediaQuery({ query: '(max-width: 1200px)' });
+    const isVerySmallScreen = useMediaQuery({ query: '(max-width: 800px)' });
 
     return (
         <>
@@ -92,7 +97,7 @@ export default function ReservationRoom() {
                                 }
                             </Header>
                             <main style={{paddingTop:'2%'}}>
-                                <section style={{display: 'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', gap: '1.5em'}}>
+                                <section style={{display: 'grid', gridTemplateColumns:`${isSmallScreen ? `${isVerySmallScreen ? '1fr':'1fr 1fr'}`:'1fr 1fr 1fr 1fr'}`, gap: '1.5em'}}>
                                     {reservationObjects.docs.map(doc =>{
                                         return <DispenseKashidashiObject
                                             key={doc.id}

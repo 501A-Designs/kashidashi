@@ -1,17 +1,15 @@
 import { useRouter } from 'next/router';
-import React,{useState,useEffect,useRef} from 'react'
+import React,{useState,useEffect} from 'react'
 import Button from '../../lib/buttons/Button';
 import Header from '../../lib/Header';
 
-import { FiFile,FiLock,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw, FiShield } from "react-icons/fi";
-import DataGrid from 'react-data-grid';
+import { FiFile,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw, FiShield } from "react-icons/fi";
 
 import {app} from '../../firebase'
-import { getFirestore, doc, getDoc, onSnapshot,updateDoc, collection, arrayRemove, deleteDoc, addDoc, getDocs } from "firebase/firestore";
-import { getAuth, signOut } from 'firebase/auth';
+import { getFirestore, doc,updateDoc, collection, deleteDoc, addDoc } from "firebase/firestore";
+import { getAuth } from 'firebase/auth';
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { async } from '@firebase/util';
 
 import Modal from 'react-modal';
 import { modalStyle } from '../../lib/style/modalStyle';
@@ -91,7 +89,6 @@ export default function AdminPannel() {
     }if (emojiType === 'rooms'){
         emojiData = ['🛋','🧑‍🏫','🧑‍🔬','🧑‍💻','🧑‍💼','🧑‍🎨','💃','🤰','🗣','👤','👥']
     }
-
 
     const removeKashidashiObject = async(docObject) =>{
         await deleteDoc(doc(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${docObject.id}`));

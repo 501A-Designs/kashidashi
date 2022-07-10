@@ -25,6 +25,9 @@ import Link from 'next/link';
 import { useCollection } from 'react-firebase-hooks/firestore';
 import IconBanner from '../lib/scene/IconBanner';
 
+import { useMediaQuery } from 'react-responsive'
+
+
 export default function App() {
     const router = useRouter();
     const [progress, setProgress] = useState(0);
@@ -48,6 +51,7 @@ export default function App() {
 
     const [newlyGeneratedRoomId, setNewlyGeneratedRoomId] = useState('')
 
+
     const createRoom = async () => {
         let docRef;
         if (roomTypeInput === 'centralMode') {
@@ -70,6 +74,8 @@ export default function App() {
         setNewlyGeneratedRoomId(docRef.id)
         setModalType('visitCreatedRoom')
     }
+
+    const isSmallScreen = useMediaQuery({ query: '(max-width: 1000px)' });
 
     return (
         <>
@@ -220,7 +226,7 @@ export default function App() {
                                 style={{
                                     position:'sticky',
                                     top: '0px',
-                                    width: '30%',
+                                    width: `${isSmallScreen ? '10%':'30%'}`,
                                     display: 'flex',
                                     flexDirection: 'column',
                                     justifyContent: 'space-between',
@@ -291,10 +297,12 @@ export default function App() {
                                                 border:'2px solid var(--accentColor)'
                                             }}
                                         />
-                                        <div>
-                                            <h3 style={{margin:0}}>{user && user.displayName.split(' ')[0]}</h3>
-                                            <p style={{margin:0,fontSize:'0.7em'}}>{user && user.email}</p>
-                                        </div>
+                                        {!isSmallScreen && 
+                                            <div>
+                                                <h3 style={{margin:0}}>{user && user.displayName.split(' ')[0]}</h3>
+                                                <p style={{margin:0,fontSize:'0.7em'}}>{user && user.email}</p>
+                                            </div>
+                                        }
                                     </AlignItems>
                                 </div>
                             </section>
@@ -324,7 +332,7 @@ export default function App() {
                                         <Nothing icon={<FiLayers/>}>
                                             <p>
                                                 作成されている貸出部屋はありません<br/>
-                                                新しく作成するには左上にある「新しい部屋を作成」のボタンを押してください。
+                                                新しく作成するには左上にある「部屋を作成」のボタンを押してください。
                                             </p>
                                         </Nothing>
                                     }
