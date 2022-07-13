@@ -22,6 +22,7 @@ import LoadingBar from 'react-top-loading-bar'
 import Nothing from '../../lib/scene/Nothing';
 import Borrowing from '../../lib/Borrowing';
 import IconBanner from '../../lib/scene/IconBanner';
+import Head from 'next/head';
 
 export default function AdminPannel() {
     const router = useRouter();
@@ -34,6 +35,7 @@ export default function AdminPannel() {
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [modalType, setModalType] = useState('');
+    const [selectedKashidashiObject, setSelectedKashidashiObject] = useState();
 
     const [aboutReservedBy,setAboutReservedBy] = useState('');
 
@@ -94,6 +96,7 @@ export default function AdminPannel() {
     }
 
     const removeKashidashiObject = async(docObject) =>{
+        setSelectedKashidashiObject();
         await deleteDoc(doc(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${docObject.id}`));
     }
 
@@ -179,6 +182,10 @@ export default function AdminPannel() {
                 onLoaderFinished={() => setProgress(0)}
                 waitingTime={500}
             />
+            <Head>
+                <title>編集</title>
+                <meta property="og:title" content="アドミン用の編集画面" key="title" />
+            </Head>
             {user ?
                 <>
                     <Modal
@@ -369,27 +376,6 @@ export default function AdminPannel() {
                                 </form>
                             </>
                         }
-                        {modalType === 'aboutUser' &&
-                            <>                            
-                                <h2>ユーザーの借り状況</h2>
-                                <p>ユーザーが他に何を借りているかの情報を安全のためアドミンが把握できるようになっています。</p>
-                                <>
-                                    {aboutReservedBy && aboutReservedBy.map(data => {
-                                        return (
-                                            <Borrowing
-                                                key={data.id}
-                                                emoji={data.emoji}
-                                                title={data.title}
-                                                place={data.place}
-                                                due={data.due}
-                                                dateReserved={data.reservedTime}
-                                                onClick={() => router.push(`/reserve/${data.reservedRoomId}`)}
-                                            />
-                                        )
-                                    })}
-                                </>
-                            </>
-                        }
                     </Modal>         
                     {roomData && reservationObjects && roomData.data().admin === user.uid ? 
                         <>
@@ -436,34 +422,150 @@ export default function AdminPannel() {
                                         </AlignItems>
                                     </AlignItems>
                                 </section>
-                                {reservationObjects.docs.map(doc =>{
-                                    return (
-                                        <KashidashiObjectRow
-                                            key={doc.id}
-                                            docObject={doc}
-                                            removeButtonOnClick = {()=>removeKashidashiObject(doc)}
-                                            editButtonOnClick = {()=>{
-                                                setModalIsOpen(true);
-                                                setModalType('edit');
-                                                setPreviousValue(doc);
-                                                setEmojiSelected(doc.data().emoji)
-                                                setTitleInput(doc.data().title)
-                                                setPlaceInput(doc.data().place)
-                                                setDueInput(doc.data().due)
+                                <section
+                                    style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: `${reservationObjects.docs.length > 0 ? '1fr 1fr':'1fr'}`,
+                                        gap: '2em'
+                                    }}
+                                >
+                                    <div>
+                                        {reservationObjects.docs.map(doc =>{
+                                            return (
+                                                <KashidashiObjectRow
+                                                    key={doc.id}
+                                                    docObject={doc}
+                                                    onClick={() => {
+                                                        setSelectedKashidashiObject(doc);
+                                                    }}
+                                                    boxShadow={selectedKashidashiObject && doc.id === selectedKashidashiObject.id ? '0px 0px 10px #E8E8E8	':'none'}
+                                                    // aboutReservedByOnClick={()=>{
+                                                    //     fetchReservedByUid(doc.reservedByUid);
+                                                    //     setModalIsOpen(true);
+                                                    //     setModalType('aboutUser')
+                                                    // }}
+                                                />
+                                            )
+                                        })}
+                                        {reservationObjects.docs.length === 0 &&
+                                            <Nothing icon={<FiFile/>}>
+                                                <p>新しく作成するには左上にある<br/>「新しく追加」のボタンを押してください。</p>
+                                            </Nothing>
+                                        }
+                                    </div>
+                                    {reservationObjects.docs.length > 0 &&                                    
+                                        <div
+                                            style={{
+                                                borderRadius: '15px',
+                                                border:'2px solid #F0F0F0',
+                                                height: 'fit-content',
+                                                padding:'1em'
                                             }}
-                                            // aboutReservedByOnClick={()=>{
-                                            //     fetchReservedByUid(doc.reservedByUid);
-                                            //     setModalIsOpen(true);
-                                            //     setModalType('aboutUser')
-                                            // }}
-                                        />
-                                    )
-                                })}
-                                {reservationObjects.docs.length === 0 &&
-                                    <Nothing icon={<FiFile/>}>
-                                        <p>新しく作成するには左上にある<br/>「新しく追加」のボタンを押してください。</p>
-                                    </Nothing>
-                                }
+                                        >
+                                            {selectedKashidashiObject ?
+                                                <>
+                                                    <AlignItems justifyContent={'space-between'}>
+                                                        <h2>{selectedKashidashiObject.data().title}</h2>
+                                                        {selectedKashidashiObject.data().reserved ?
+                                                            <div
+                                                                style={{
+                                                                    backgroundColor: 'var(--accentColor)',
+                                                                    color:'white',
+                                                                    padding: '0.5em 1em',
+                                                                    borderRadius: '15px',
+                                                                    fontSize: '0.8em'
+                                                                }}
+                                                            >
+                                                                貸し出し中
+                                                            </div>:
+                                                            <AlignItems>
+                                                                <Button
+                                                                    icon={<FiEdit/>}
+                                                                    onClick={() =>{
+                                                                        setModalIsOpen(true);
+                                                                        setModalType('edit');
+                                                                        setPreviousValue(selectedKashidashiObject);
+                                                                        setEmojiSelected(selectedKashidashiObject.data().emoji)
+                                                                        setTitleInput(selectedKashidashiObject.data().title)
+                                                                        setPlaceInput(selectedKashidashiObject.data().place)
+                                                                        setDueInput(selectedKashidashiObject.data().due)
+                                                                    }}
+                                                                >
+                                                                    編集
+                                                                </Button>
+                                                                <Button
+                                                                    icon={<FiTrash2/>}
+                                                                    onClick={()=>removeKashidashiObject(selectedKashidashiObject)}
+                                                                    accentColor={true}
+                                                                >
+                                                                    消去
+                                                                </Button>
+                                                            </AlignItems>
+                                                        }
+
+                                                        {/* 
+                                                        <>
+                                                            {aboutReservedBy && aboutReservedBy.map(data => {
+                                                                return (
+                                                                    <Borrowing
+                                                                        key={data.id}
+                                                                        emoji={data.emoji}
+                                                                        title={data.title}
+                                                                        place={data.place}
+                                                                        due={data.due}
+                                                                        dateReserved={data.reservedTime}
+                                                                        onClick={() => router.push(`/reserve/${data.reservedRoomId}`)}
+                                                                    />
+                                                                )
+                                                            })}
+                                                        </> */}
+                                                    </AlignItems>
+                                                    <div>
+                                                        <h4>基本情報</h4>
+                                                        <ul>
+                                                            <li>場所：{selectedKashidashiObject.data().place}</li>
+                                                            <li>貸し出し期間：{selectedKashidashiObject.data().due}時間</li>
+                                                            {/* <li>ID：{selectedKashidashiObject.id}</li> */}
+                                                        </ul>
+                                                    </div>
+                                                    {selectedKashidashiObject.data().reserved &&                                                    
+                                                        <div
+                                                            style={{
+                                                                backgroundColor:'#f0f0f0',
+                                                                borderRadius: '10px',
+                                                                padding: '1em',
+                                                                display: 'grid',
+                                                                gridTemplateColumns:'1fr',
+                                                                gap: '1em'
+                                                            }}
+                                                        >
+                                                            <AlignItems gap={'1em'}>
+                                                                <img src={selectedKashidashiObject.data().reservedByPhoto} alt={'userimage'} style={{width:'50px', height:'50px'}}/>
+                                                                <div>
+                                                                    <h3 style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedBy}</h3>
+                                                                    <p style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedByEmail}</p>
+                                                                </div>
+                                                            </AlignItems>
+                                                            <div
+                                                                style={{
+                                                                    textAlign:'center',
+                                                                    borderRadius:'10px',
+                                                                    backgroundColor:'white',
+                                                                    padding:'0.5em 1em'
+                                                                }}
+                                                            >
+                                                                <AlignItems justifyContent={'center'}><FiCheck/><span>借り始めた日時：{selectedKashidashiObject.data().reservedTime}</span></AlignItems>
+                                                            </div>
+                                                        </div>
+                                                    }
+                                                </>:
+                                                <Nothing icon={<FiFile/>}>
+                                                    <p>何も選択されていません</p>
+                                                </Nothing>
+                                            }
+                                        </div>
+                                    }
+                                </section>
                             </main>
                         </>:<Nothing icon={<FiShield/>}>
                             <p>アドミンしかアクセスできません。</p>

@@ -22,6 +22,7 @@ import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import Nothing from '../../lib/scene/Nothing';
 
 import { useMediaQuery } from 'react-responsive'
+import Head from 'next/head';
 
 
 export default function ReservationRoom() {
@@ -45,6 +46,8 @@ export default function ReservationRoom() {
             reserved:true,
             reservedBy:user && user.displayName,
             reservedByUid:user && user.uid,
+            reservedByEmail:user && user.email,
+            reservedByPhoto: user && user.photoURL,
             reservedTime:timeNow,
         });
         await setDoc(doc(db, `user/${user && user.uid}/reservedObjects/${docObject.id}/`), {
@@ -68,6 +71,10 @@ export default function ReservationRoom() {
                 onLoaderFinished={() => setProgress(0)}
                 waitingTime={500}
             />
+            <Head>
+                <title>貸し出し中</title>
+                <meta property="og:title" content="ディスペンスモードの貸し出し画面" key="title" />
+            </Head>
             {user ? 
                 <>
                     {roomData && reservationObjects && roomData.data().emailGroup.split('@')[1] === user.email.split('@')[1] ? 

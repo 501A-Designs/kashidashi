@@ -26,6 +26,7 @@ import { useCollection } from 'react-firebase-hooks/firestore';
 import IconBanner from '../lib/scene/IconBanner';
 
 import { useMediaQuery } from 'react-responsive'
+import Head from 'next/head';
 
 
 export default function App() {
@@ -74,6 +75,10 @@ export default function App() {
                 onLoaderFinished={() => setProgress(0)}
                 waitingTime={500}
             />
+            <Head>
+                <title>Dashboard</title>
+                <meta property="og:title" content="Kashidashiのダッシュボード" key="title" />
+            </Head>
             {user ? 
                 <>
                     <Modal

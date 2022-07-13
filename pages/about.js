@@ -56,16 +56,29 @@ export default function About() {
           <p>アドミンは部屋を作成した後、他の人・自身の団体のメンバーに貸し出し管理を運用する必要があります。Kashidashiを使う場合二種類（ディスペンスモードとセントラルモード）の方法がございます。</p>
           <h3>ディスペンスモード</h3>
           <p>
-            ディスペンスモードの仕組みについては<Link href={pitchLink+'/ea304f9e-c745-4af5-8a8e-1407537c4cdd'} target={'_blank'} rel="noreferrer"><a>こちら</a></Link>のスライドでわかります。
+            ディスペンスモードは事前予約式の席の確保や部屋の貸し出しの予約に適した設定です。ドメイン制限という機能より、Kashidashiの部屋は同じGsuiteの組織に所属しているメンバーのみが入れるようになっています。
+          </p>
+          <img src={'/dispenseModeExample.png'} width="100%" height="auto" alt="logo"  style={{border:'2px solid #F0F0F0'}}/>
+          <p>
+            ディスペンスモードでは部屋を作成する人（アドミン）が部屋のリンクを共有しユーザーがそれぞれのパソコンからアクセスし遠隔的に借りる予約を入れています。
+            <br/>
+            ※ディスペンスモードについては<Link href={pitchLink+'/ea304f9e-c745-4af5-8a8e-1407537c4cdd'} target={'_blank'} rel="noreferrer"><a>こちら</a></Link>のスライドでわかります。
           </p>
           <h3>セントラルモード</h3>
           <p>
-            セントラルモードの仕組みについては<Link href={pitchLink+'/d28358b2-2b7b-4e3a-aef9-ea24d1f00838'} target={'_blank'} rel="noreferrer"><a>こちら</a></Link>のスライドでわかります。
+            セントラルモードは現場での予約・貸し出しを行いたい人のための貸し出し方法です。アドミンのパソコンでKashidashiを開きセントラルモードに入ると、アカウントを持ってない人でも図書館のように現場で名前とメールアドレスを入力することで借りることができます。
           </p>
-          <h2>アクセス制限</h2>
+          <img src={'/centralModeExample.png'} width="100%" height="auto" alt="logo"  style={{border:'2px solid #F0F0F0'}}/>
           <p>
-            新しい部屋を作るとデフォルトでKashidashiにログインしている人誰もがアクセスできるようになっています。Gsuiteをご使用の団体様はご自分の独自メールドメイン（@gmail.comではなく@団体名.jp等のメールアドレス）でアクセスの許可を制限することができます。詳しくは<Link href={pitchLink} rel="noreferrer"><a>スライド</a></Link>を読むと良いです。
+            ※セントラルモードの仕組みについては<Link href={pitchLink+'/d28358b2-2b7b-4e3a-aef9-ea24d1f00838'} target={'_blank'} rel="noreferrer"><a>こちら</a></Link>のスライドでわかります。
           </p>
+          <h2>ドメイン制限　※ディスペンスモード仕様の部屋</h2>
+          <p>
+            Kashidashiを利用するユーザー様の多くは団体の責任者等だと思われます。そのため、部屋を作成するアドミンのメールアドレスのドメインを元に自動的にアクセス権限が指定され、設定をいじる必要なく、意図する人のみに共有が可能です。
+
+            なお、Gsuiteをご使用でないユーザー様（メールドメインが通常の@gmail.comである方）はKashidashiにログインし、部屋を作成すると、Gsuiteに所属しているユーザーと同じ様に、@gmail.comのメールアドレスを持っている人が全てアクセスできるようになっています。そのため、KashidashiはGsuiteをご使用の団体様のみにお勧めしています。
+          </p>
+          <img src={'/domainAccessExample.png'} width="100%" height="auto" alt="logo"  style={{border:'2px solid #F0F0F0'}}/>
           <h1>ユーザー様に関する事</h1>
           <h2>プライバシーポリシー</h2>
           <p>
