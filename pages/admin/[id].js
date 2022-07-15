@@ -3,7 +3,7 @@ import React,{useState,useEffect} from 'react'
 import Button from '../../lib/buttons/Button';
 import Header from '../../lib/Header';
 
-import { FiFile,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw, FiShield } from "react-icons/fi";
+import { FiFile,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw, FiShield, FiCalendar, FiArrowUp } from "react-icons/fi";
 
 import {app} from '../../firebase'
 import { getFirestore, doc,updateDoc, collection, deleteDoc, addDoc } from "firebase/firestore";
@@ -23,6 +23,10 @@ import Nothing from '../../lib/scene/Nothing';
 import Borrowing from '../../lib/Borrowing';
 import IconBanner from '../../lib/scene/IconBanner';
 import Head from 'next/head';
+
+
+import moment from 'moment';
+import 'moment/locale/ja'
 
 export default function AdminPannel() {
     const router = useRouter();
@@ -173,6 +177,42 @@ export default function AdminPannel() {
             </>
         )
     }
+    
+    function TimeLine(props) {
+      return (
+        <div>
+            <AlignItems gap={'1em'}>
+                <div
+                    style={{
+                        backgroundColor: 'var(--accentColor)',
+                        color: 'white',
+                        height:'30px',
+                        width:'30px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderRadius: '10px',
+                        padding: '0.5em'
+                    }}
+                >
+                    {props.icon}
+                </div>
+                <span>{props.children}</span>
+            </AlignItems>
+            {props.addBottomLine &&
+                <div
+                    style={{
+                        marginLeft: '0.8em',
+                        border: `1px solid ${props.color}`,
+                        width:'0px',
+                        height:`${props.height ? props.height:'20px'}`
+                    }}
+                />
+            }
+        </div>
+      )
+    }
+    
 
     return (
         <>
@@ -525,38 +565,78 @@ export default function AdminPannel() {
                                                         <ul>
                                                             <li>場所：{selectedKashidashiObject.data().place}</li>
                                                             <li>貸し出し期間：{selectedKashidashiObject.data().due}時間</li>
-                                                            {/* <li>ID：{selectedKashidashiObject.id}</li> */}
                                                         </ul>
                                                     </div>
-                                                    {selectedKashidashiObject.data().reserved &&                                                    
-                                                        <div
-                                                            style={{
-                                                                backgroundColor:'#f0f0f0',
-                                                                borderRadius: '10px',
-                                                                padding: '1em',
-                                                                display: 'grid',
-                                                                gridTemplateColumns:'1fr',
-                                                                gap: '1em'
-                                                            }}
-                                                        >
-                                                            <AlignItems gap={'1em'}>
-                                                                <img src={selectedKashidashiObject.data().reservedByPhoto} alt={'userimage'} style={{width:'50px', height:'50px'}}/>
-                                                                <div>
-                                                                    <h3 style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedBy}</h3>
-                                                                    <p style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedByEmail}</p>
-                                                                </div>
-                                                            </AlignItems>
+                                                    {roomData.data().roomType === 'dispenseMode' && selectedKashidashiObject.data().reserved &&  
+                                                        <>
                                                             <div
                                                                 style={{
-                                                                    textAlign:'center',
-                                                                    borderRadius:'10px',
-                                                                    backgroundColor:'white',
-                                                                    padding:'0.5em 1em'
+                                                                    backgroundColor:'#f0f0f0',
+                                                                    borderRadius: '10px',
+                                                                    padding: '1em',
+                                                                    display: 'grid',
+                                                                    gridTemplateColumns:'1fr',
+                                                                    gap: '1em'
                                                                 }}
                                                             >
-                                                                <AlignItems justifyContent={'center'}><FiCheck/><span>借り始めた日時：{selectedKashidashiObject.data().reservedTime}</span></AlignItems>
+                                                                <AlignItems gap={'1em'}>
+                                                                    <img src={selectedKashidashiObject.data().reservedByPhoto} alt={'userimage'} style={{width:'50px', height:'50px'}}/>
+                                                                    <div>
+                                                                        <h3 style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedBy}</h3>
+                                                                        <p style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedByEmail}</p>
+                                                                    </div>
+                                                                </AlignItems>
+                                                                <div
+                                                                    style={{
+                                                                        borderRadius:'10px',
+                                                                        backgroundColor:'white',
+                                                                        padding:'1em',
+                                                                    }}
+                                                                >
+                                                                    <TimeLine
+                                                                        icon={<FiCheck/>}
+                                                                        addBottomLine={true}
+                                                                        color={'var(--faintAccentColor)'}
+                                                                    >
+                                                                        予約日時：{selectedKashidashiObject.data().reservedTime}
+                                                                    </TimeLine>
+                                                                    {selectedKashidashiObject.data().reservedSingleDate ?
+                                                                        <TimeLine
+                                                                            icon={<FiCalendar/>}
+                                                                        >
+                                                                            予約日：{moment(selectedKashidashiObject.data().reservedSlotStart.toDate().toDateString()).format('MMMM Do YYYY')}
+                                                                        </TimeLine>:
+                                                                        <>
+                                                                            <TimeLine
+                                                                                icon={<FiCalendar/>}
+                                                                                addBottomLine={true}
+                                                                                color={'var(--accentColor)'}
+                                                                                height={'40px'}
+                                                                            >
+                                                                                始まり：{moment(selectedKashidashiObject.data().reservedSlotStart.toDate().toDateString()).format('MMMM Do YYYY')}
+                                                                            </TimeLine>
+                                                                            <TimeLine
+                                                                                icon={<FiArrowUp/>}
+                                                                            >
+                                                                                終わり：{moment(selectedKashidashiObject.data().reservedSlotEnd.toDate().toDateString()).format('MMMM Do YYYY')}
+                                                                            </TimeLine>
+                                                                        </>
+                                                                    }
+                                                                </div>
+                                                                <div
+                                                                    style={{
+                                                                        borderRadius:'10px',
+                                                                        backgroundColor:'white',
+                                                                        padding:'1em',
+                                                                    }}
+                                                                >
+                                                                    <h4 style={{margin:0}}>使用目的</h4>
+                                                                    <p>
+                                                                        {selectedKashidashiObject.data().reservedReason}
+                                                                    </p>
+                                                                </div>
                                                             </div>
-                                                        </div>
+                                                        </>                      
                                                     }
                                                 </>:
                                                 <Nothing icon={<FiFile/>}>

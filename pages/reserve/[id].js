@@ -32,6 +32,9 @@ import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRange } from 'react-date-range';
 import {ja} from 'react-date-range/dist/locale';
+import { addDays } from 'date-fns';
+
+
 import TextArea from '../../lib/TextArea';
 
 
@@ -95,7 +98,7 @@ export default function ReservationRoom() {
     const [calendarState, setCalendarState] = useState([
         {
           startDate: new Date(),
-          endDate: null,
+          endDate: addDays(new Date(), 2),
           key: 'selection'
         }
     ]);
@@ -149,15 +152,22 @@ export default function ReservationRoom() {
                                         moveRangeOnFirstSelection={false}
                                         ranges={calendarState}
                                         locale={ja}
+
+                                        minDate={addDays(new Date(), 0)}
+                                        maxDate={addDays(new Date(), 90)}
+
+                                        disabledDates={[new Date(2022, (7 - 1), 31)]}
                                     />
                                 </div>
-                                <Button
-                                    accentColor={true}
-                                    // icon={<FiRefreshCw/>}
-                                    onClick={() => setReserveModalSection('reserve')}
-                                >
-                                    次へ
-                                </Button>
+                                {calendarState[0].startDate && calendarState[0].endDate &&
+                                    <Button
+                                        accentColor={true}
+                                        // icon={<FiRefreshCw/>}
+                                        onClick={() => setReserveModalSection('reserve')}
+                                    >
+                                        次へ
+                                    </Button>
+                                }
                             </>
                         }
                         {reserveModalSection === 'reserve' &&
@@ -215,7 +225,6 @@ export default function ReservationRoom() {
                                                 setReserveModalObject(doc);
                                                 setModalIsOpen(true);
                                                 setReserveModalSection('date');
-                                                // reserveKashidashiObject(doc);
                                             }}
                                             reservedBy={doc.data().reservedBy}
                                             reservedByUid = {doc.data().reservedByUid}
