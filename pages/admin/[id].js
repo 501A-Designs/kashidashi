@@ -3,7 +3,7 @@ import React,{useState,useEffect} from 'react'
 import Button from '../../lib/buttons/Button';
 import Header from '../../lib/Header';
 
-import { FiFile,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw, FiShield, FiCalendar, FiArrowUp } from "react-icons/fi";
+import { FiFile,FiFilePlus,FiXCircle,FiCheck,FiEdit,FiHome,FiPlay,FiSettings,FiTrash2, FiAlertTriangle, FiRefreshCw, FiShield, FiCalendar, FiArrowUp, FiChevronDown, FiChevronUp } from "react-icons/fi";
 
 import {app} from '../../firebase'
 import { getFirestore, doc,updateDoc, collection, deleteDoc, addDoc } from "firebase/firestore";
@@ -20,7 +20,6 @@ import LoginRequired from '../../lib/scene/LoginRequired';
 
 import LoadingBar from 'react-top-loading-bar'
 import Nothing from '../../lib/scene/Nothing';
-import Borrowing from '../../lib/Borrowing';
 import IconBanner from '../../lib/scene/IconBanner';
 import Head from 'next/head';
 
@@ -41,7 +40,7 @@ export default function AdminPannel() {
     const [modalType, setModalType] = useState('');
     const [selectedKashidashiObject, setSelectedKashidashiObject] = useState();
 
-    const [aboutReservedBy,setAboutReservedBy] = useState('');
+    const [aboutReservedBy,setAboutReservedBy] = useState(false);
 
     const [roomTitleInput, setRoomTitleInput] = useState('');
     const [roomDescriptionInput, setRoomDescriptionInput] = useState('');
@@ -97,6 +96,19 @@ export default function AdminPannel() {
         emojiData = ['🏀','🏈','🥎','🎾','🏐','🏉','🥏','🎱','🪀','🏓','🏸','🏒','🏑','🥍','🥅','🥊','🥋','🛷','⛸','🎿',]
     }if (emojiType === 'rooms'){
         emojiData = ['🛋','🧑‍🏫','🧑‍🔬','🧑‍💻','🧑‍💼','🧑‍🎨','💃','🤰','🗣','👤','👥']
+    }
+
+
+    const [reservedUserId] = useCollection(collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${selectedKashidashiObject && selectedKashidashiObject.id}/reservedUser/`));
+    const numberOfDates = (startDate, stopDate) => {
+        var dateArray = [];
+        var currentDate = moment(startDate);
+        var stopDate = moment(stopDate);
+        while (currentDate <= stopDate) {
+            dateArray.push(moment(currentDate).format('YYYY-MM-DD'))
+            currentDate = moment(currentDate).add(1, 'days');
+        }
+        return dateArray.length;
     }
 
     const removeKashidashiObject = async(docObject) =>{
@@ -200,14 +212,17 @@ export default function AdminPannel() {
                 <span>{props.children}</span>
             </AlignItems>
             {props.addBottomLine &&
-                <div
-                    style={{
-                        marginLeft: '0.8em',
-                        border: `1px solid ${props.color}`,
-                        width:'0px',
-                        height:`${props.height ? props.height:'20px'}`
-                    }}
-                />
+                <AlignItems gap={'1em'}>
+                    <div
+                        style={{
+                            marginLeft: '0.8em',
+                            border: `1px solid ${props.color}`,
+                            width:'0px',
+                            height:`${props.height ? props.height:'20px'}`
+                        }}
+                    />
+                    {props.between}
+                </AlignItems>
             }
         </div>
       )
@@ -480,11 +495,6 @@ export default function AdminPannel() {
                                                     }}
                                                     boxShadow={selectedKashidashiObject && doc.id === selectedKashidashiObject.id ? '0px 0px 10px #E8E8E8	':'none'}
                                                     reservationRoomId={reservationRoomId && reservationRoomId}
-                                                    // aboutReservedByOnClick={()=>{
-                                                    //     fetchReservedByUid(doc.reservedByUid);
-                                                    //     setModalIsOpen(true);
-                                                    //     setModalType('aboutUser')
-                                                    // }}
                                                 />
                                             )
                                         })}
@@ -543,23 +553,6 @@ export default function AdminPannel() {
                                                                 </Button>
                                                             </AlignItems>
                                                         }
-
-                                                        {/* 
-                                                        <>
-                                                            {aboutReservedBy && aboutReservedBy.map(data => {
-                                                                return (
-                                                                    <Borrowing
-                                                                        key={data.id}
-                                                                        emoji={data.emoji}
-                                                                        title={data.title}
-                                                                        place={data.place}
-                                                                        due={data.due}
-                                                                        dateReserved={data.reservedTime}
-                                                                        onClick={() => router.push(`/reserve/${data.reservedRoomId}`)}
-                                                                    />
-                                                                )
-                                                            })}
-                                                        </> */}
                                                     </AlignItems>
                                                     <div>
                                                         <h4>基本情報</h4>
@@ -568,75 +561,97 @@ export default function AdminPannel() {
                                                             <li>貸し出し期間：{selectedKashidashiObject.data().due}時間</li>
                                                         </ul>
                                                     </div>
-                                                    {roomData.data().roomType === 'dispenseMode' && selectedKashidashiObject.data().reserved &&  
+                                                    {roomData.data().roomType === 'dispenseMode' && reservedUserId && reservedUserId.docs.length > 0 &&  
                                                         <>
-                                                            <div
-                                                                style={{
-                                                                    backgroundColor:'#f0f0f0',
-                                                                    borderRadius: '10px',
-                                                                    padding: '1em',
-                                                                    display: 'grid',
-                                                                    gridTemplateColumns:'1fr',
-                                                                    gap: '1em'
-                                                                }}
-                                                            >
-                                                                <AlignItems gap={'1em'}>
-                                                                    <img src={selectedKashidashiObject.data().reservedByPhoto} alt={'userimage'} style={{width:'50px', height:'50px'}}/>
-                                                                    <div>
-                                                                        <h3 style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedBy}</h3>
-                                                                        <p style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedByEmail}</p>
-                                                                    </div>
-                                                                </AlignItems>
-                                                                <div
-                                                                    style={{
-                                                                        borderRadius:'10px',
-                                                                        backgroundColor:'white',
-                                                                        padding:'1em',
-                                                                    }}
-                                                                >
-                                                                    <TimeLine
-                                                                        icon={<FiCheck/>}
-                                                                        addBottomLine={true}
-                                                                        color={'var(--faintAccentColor)'}
+                                                            {reservedUserId.docs.map(doc =>{
+                                                                return(
+                                                                    <div
+                                                                        style={{
+                                                                            backgroundColor:'#f0f0f0',
+                                                                            borderRadius: '15px',
+                                                                            padding: '1em',
+                                                                            display: 'grid',
+                                                                            gridTemplateColumns:'1fr',
+                                                                            gap: '2px',
+                                                                            marginTop: '1em'
+                                                                        }}
                                                                     >
-                                                                        予約日時：{selectedKashidashiObject.data().reservedTime}
-                                                                    </TimeLine>
-                                                                    {selectedKashidashiObject.data().reservedSingleDate ?
-                                                                        <TimeLine
-                                                                            icon={<FiCalendar/>}
-                                                                        >
-                                                                            予約日：{moment(selectedKashidashiObject.data().reservedSlotStart.toDate().toDateString()).format('MMMM Do YYYY')}
-                                                                        </TimeLine>:
-                                                                        <>
-                                                                            <TimeLine
-                                                                                icon={<FiCalendar/>}
-                                                                                addBottomLine={true}
-                                                                                color={'var(--accentColor)'}
-                                                                                height={'40px'}
-                                                                            >
-                                                                                始まり：{moment(selectedKashidashiObject.data().reservedSlotStart.toDate().toDateString()).format('MMMM Do YYYY')}
-                                                                            </TimeLine>
-                                                                            <TimeLine
-                                                                                icon={<FiArrowUp/>}
-                                                                            >
-                                                                                終わり：{moment(selectedKashidashiObject.data().reservedSlotEnd.toDate().toDateString()).format('MMMM Do YYYY')}
-                                                                            </TimeLine>
-                                                                        </>
-                                                                    }
-                                                                </div>
-                                                                <div
-                                                                    style={{
-                                                                        borderRadius:'10px',
-                                                                        backgroundColor:'white',
-                                                                        padding:'1em',
-                                                                    }}
-                                                                >
-                                                                    <h4 style={{margin:0}}>使用目的</h4>
-                                                                    <p>
-                                                                        {selectedKashidashiObject.data().reservedReason}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
+                                                                        <AlignItems justifyContent={'space-between'}>
+                                                                            <AlignItems gap={'1em'}>
+                                                                                <img src={doc.data().reservedByPhoto} alt={'userimage'} style={{width:'50px', height:'50px'}}/>
+                                                                                <div>
+                                                                                    <h3 style={{margin:0,padding:0}}>{doc.data().reservedBy}</h3>
+                                                                                    <p style={{margin:0,padding:0}}>{doc.data().reservedByEmail}</p>
+                                                                                </div>
+                                                                            </AlignItems>
+                                                                            <Button
+                                                                                icon={aboutReservedBy ? <FiChevronUp/>:<FiChevronDown/>}
+                                                                                onClick={() => aboutReservedBy ? setAboutReservedBy(false):setAboutReservedBy(true)}
+                                                                            />
+                                                                        </AlignItems>
+                                                                        {aboutReservedBy &&
+                                                                            <>
+                                                                                <div
+                                                                                    style={{
+                                                                                        borderRadius:'10px 10px 0px 0px',
+                                                                                        backgroundColor:'white',
+                                                                                        padding:'1em',
+                                                                                        marginTop: '1em'
+                                                                                    }}
+                                                                                >
+                                                                                    <TimeLine
+                                                                                        icon={<FiCheck/>}
+                                                                                        addBottomLine={true}
+                                                                                        color={'var(--faintAccentColor)'}
+                                                                                    >
+                                                                                        予約日時：{doc.data().reservedTime}
+                                                                                    </TimeLine>
+                                                                                    {doc.reservedSlotStart === doc.data().reservedSlotEnd ?
+                                                                                        <TimeLine
+                                                                                            icon={<FiCalendar/>}
+                                                                                        >
+                                                                                            予約日：{moment(doc.data().reservedSlotStart.toDate().toDateString()).format('MMMM Do YYYY')}
+                                                                                        </TimeLine>:
+                                                                                        <>
+                                                                                            <TimeLine
+                                                                                                icon={<FiCalendar/>}
+                                                                                                addBottomLine={true}
+                                                                                                color={'var(--accentColor)'}
+                                                                                                height={'60px'}
+                                                                                                between={
+                                                                                                    <p style={{color: 'var(--accentColor)'}}>
+                                                                                                        始まりと終わり含めて{numberOfDates(doc.data().reservedSlotStart.toDate().toDateString(),doc.data().reservedSlotEnd.toDate().toDateString())}日間予約済み
+                                                                                                    </p>
+                                                                                                }
+                                                                                            >
+                                                                                                始まり：{moment(doc.data().reservedSlotStart.toDate().toDateString()).format('MMMM Do YYYY')}
+                                                                                            </TimeLine>
+                                                                                            <TimeLine
+                                                                                                icon={<FiArrowUp/>}
+                                                                                            >
+                                                                                                終わり：{moment(doc.data().reservedSlotEnd.toDate().toDateString()).format('MMMM Do YYYY')}
+                                                                                            </TimeLine>
+                                                                                        </>
+                                                                                    }
+                                                                                </div>
+                                                                                <div
+                                                                                    style={{
+                                                                                        borderRadius:'0px 0px 10px 10px',
+                                                                                        backgroundColor:'white',
+                                                                                        padding:'1em',
+                                                                                    }}
+                                                                                >
+                                                                                    <h4 style={{margin:0}}>使用目的</h4>
+                                                                                    <p>
+                                                                                        {doc.data().reservedReason}
+                                                                                    </p>
+                                                                                </div>
+                                                                            </>
+                                                                        }
+                                                                    </div>
+                                                                )
+                                                            })
+                                                            }
                                                         </>                      
                                                     }
                                                 </>:

@@ -63,10 +63,10 @@ export default function ReservationRoom() {
         if (check) {            
             let timeNow = moment().format('MMMM Do YYYY, h:mm a');
             await setDoc(doc(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${reserveModalObject.id}/reservedUser/${user && user.uid}`), {
-                // reservedBy:user && user.displayName,
-                // reservedByUid:user && user.uid,
-                // reservedByEmail:user && user.email,
-                // reservedByPhoto: user && user.photoURL,
+                reservedBy:user && user.displayName,
+                reservedByEmail:user && user.email,
+                reservedByPhoto: user && user.photoURL,
+
                 reservedReason:reservationReasonInput,
                 reservedSlotStart:calendarState[0].startDate,
                 reservedSlotEnd:calendarState[0].endDate,
