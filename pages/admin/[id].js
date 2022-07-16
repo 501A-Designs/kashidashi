@@ -11,6 +11,7 @@ import { getAuth } from 'firebase/auth';
 import { useCollection, useDocument } from 'react-firebase-hooks/firestore';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
+Modal.setAppElement('#__next');
 import Modal from 'react-modal';
 import { modalStyle } from '../../lib/style/modalStyle';
 import AlignItems from '../../lib/style/AlignItems';
@@ -67,17 +68,10 @@ export default function AdminPannel() {
 
     const roomDataDocumentRef = doc(db, `rooms/${reservationRoomId && reservationRoomId}/`)
     const [roomData] =  useDocument(roomDataDocumentRef);
-    console.log(roomData);
 
     const reservationObjectsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
     const [reservationObjects] = useCollection(reservationObjectsCollectionRef);
     const [reservedStatus, setReservedStatus] = useState(false);
-
-    useEffect(() => {
-        reservationObjects && reservationObjects.docs.map(doc =>{
-            doc.data().reserved && setReservedStatus(true);
-        })
-    },[reservationObjects])
 
     const [previousValue, setPreviousValue] = useState();
     const [emojiSelected, setEmojiSelected] = useState('');
@@ -98,8 +92,8 @@ export default function AdminPannel() {
         emojiData = ['🛋','🧑‍🏫','🧑‍🔬','🧑‍💻','🧑‍💼','🧑‍🎨','💃','🤰','🗣','👤','👥']
     }
 
-
     const [reservedUserId] = useCollection(collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${selectedKashidashiObject && selectedKashidashiObject.id}/reservedUser/`));
+
     const numberOfDates = (startDate, stopDate) => {
         var dateArray = [];
         var currentDate = moment(startDate);
@@ -110,6 +104,15 @@ export default function AdminPannel() {
         }
         return dateArray.length;
     }
+
+
+    useEffect(() => {
+        reservationObjects && reservationObjects.docs.map(doc =>{
+            doc.data().reserved && setReservedStatus(true);
+        })
+        reservedUserId && reservedUserId.docs.length > 0 && setReservedStatus(true);
+    },[reservationObjects])
+
 
     const removeKashidashiObject = async(docObject) =>{
         setSelectedKashidashiObject();
@@ -564,6 +567,7 @@ export default function AdminPannel() {
                                                             {reservedUserId.docs.map(doc =>{
                                                                 return(
                                                                     <div
+                                                                        key={doc.id}
                                                                         style={{
                                                                             backgroundColor:'#f0f0f0',
                                                                             borderRadius: '15px',

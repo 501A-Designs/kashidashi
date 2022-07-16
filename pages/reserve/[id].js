@@ -23,6 +23,7 @@ import Nothing from '../../lib/scene/Nothing';
 import { useMediaQuery } from 'react-responsive'
 import Head from 'next/head';
 
+Modal.setAppElement('#__next');
 import Modal from 'react-modal';
 import { modalStyle } from '../../lib/style/modalStyle';
 
