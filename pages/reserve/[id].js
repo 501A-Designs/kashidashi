@@ -32,9 +32,7 @@ import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRange } from 'react-date-range';
 import {ja} from 'react-date-range/dist/locale';
 import { addDays } from 'date-fns';
-
 import TextArea from '../../lib/TextArea';
-
 
 export default function ReservationRoom() {
     const router = useRouter();

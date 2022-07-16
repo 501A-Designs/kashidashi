@@ -656,7 +656,7 @@ export default function AdminPannel() {
                                                             }
                                                         </>
                                                     }
-                                                    {roomData.data().roomType === 'centralMode' &&
+                                                    {roomData.data().roomType === 'centralMode' && selectedKashidashiObject.data().reserved &&
                                                         <div
                                                             style={{
                                                                 backgroundColor:'#f0f0f0',
@@ -693,7 +693,7 @@ export default function AdminPannel() {
                                                             >
                                                                 <h4 style={{margin:0}}>使用目的</h4>
                                                                 <p>
-                                                                    {/* {doc.data().reservedReason} */}
+                                                                    {selectedKashidashiObject.data().reservedReason}
                                                                 </p>
                                                             </div>
                                                         </div>
