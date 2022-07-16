@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React,{useState} from 'react'
+import React,{useEffect, useState} from 'react'
 
 import Header from '../../lib/Header'
 import DispenseKashidashiObject from '../../lib/DispenseKashidashiObject'
@@ -62,26 +62,24 @@ export default function ReservationRoom() {
         const check = confirm(`本当に借りますか？`);
         if (check) {            
             let timeNow = moment().format('MMMM Do YYYY, h:mm a');
-            await updateDoc(doc(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${reserveModalObject.id}/`), {
-                reserved:true,
-                reservedBy:user && user.displayName,
-                reservedByUid:user && user.uid,
-                reservedByEmail:user && user.email,
-                reservedByPhoto: user && user.photoURL,
-                reservedTime:timeNow,
-                reservedSingleDate:calendarState[0].startDate === calendarState[0].endDate ? true:false,
+            await setDoc(doc(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${reserveModalObject.id}/reservedUser/${user && user.uid}`), {
+                // reservedBy:user && user.displayName,
+                // reservedByUid:user && user.uid,
+                // reservedByEmail:user && user.email,
+                // reservedByPhoto: user && user.photoURL,
+                reservedReason:reservationReasonInput,
                 reservedSlotStart:calendarState[0].startDate,
                 reservedSlotEnd:calendarState[0].endDate,
-                reservedReason:reservationReasonInput,
+                reservedTime:timeNow,
             });
             await setDoc(doc(db, `user/${user && user.uid}/reservedObjects/${reserveModalObject.id}/`), {
                 emoji:reserveModalObject.data().emoji,
                 title:reserveModalObject.data().title,
                 place:reserveModalObject.data().place,
                 due:reserveModalObject.data().due,
+
                 reservedTime:timeNow,
                 reservedRoomId:reservationRoomId,
-                reservedSingleDate:calendarState[0].startDate === calendarState[0].endDate ? true:false,
                 reservedSlotStart:calendarState[0].startDate,
                 reservedSlotEnd:calendarState[0].endDate,
                 reservedReason:reservationReasonInput,
@@ -94,7 +92,6 @@ export default function ReservationRoom() {
     const isSmallScreen = useMediaQuery({ query: '(max-width: 1200px)' });
     const isVerySmallScreen = useMediaQuery({ query: '(max-width: 800px)' });
 
-    
     const [calendarState, setCalendarState] = useState([
         {
           startDate: new Date(),
@@ -102,7 +99,40 @@ export default function ReservationRoom() {
           key: 'selection'
         }
     ]);
-    console.log(calendarState);
+
+    const getDates = (startDate, stopDate) => {
+        var dateArray = [];
+        var currentDate = moment(startDate);
+        var stopDate = moment(stopDate);
+        while (currentDate <= stopDate) {
+            dateArray.push(moment(currentDate).format('YYYY-MM-DD'))
+            currentDate = moment(currentDate).add(1, 'days');
+        }
+        return dateArray;
+    }
+
+    const betweenDatesArray = (startDate, stopDate) =>{
+        let datesFormatedArray = [];
+        getDates(startDate, stopDate).map(date =>{
+            datesFormatedArray.push(new Date(date))
+        })
+        return datesFormatedArray;
+    }
+    
+    const [disabledDatesArray, setDisabledDatesArray] = useState();
+    const [reservedUserId] = useCollection(collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${reserveModalObject.id}/reservedUser/`));
+    
+    let temporaryArray = [];
+    reserveModalObject && reservedUserId && reservedUserId.docs.map((doc) =>{
+        temporaryArray.push(
+            betweenDatesArray(doc.data().reservedSlotStart.toDate().toDateString(),doc.data().reservedSlotEnd.toDate().toDateString())
+        )
+    })
+    
+    // useEffect(() => {        
+    //     console.log(temporaryArray.flat())
+    //     setDisabledDatesArray(temporaryArray)
+    // },[reserveModalObject && temporaryArray])
 
     return (
         <>
@@ -146,7 +176,7 @@ export default function ReservationRoom() {
                                     }}
                                     >
                                     <DateRange
-                                        rangeColors={['var(--accentColor)','var(--faintAccentColor','#f0f0f0']}
+                                        rangeColors={['var(--accentColor)','var(--faintAccentColor)','#f0f0f0']}
                                         editableDateInputs={true}
                                         onChange={item => setCalendarState([item.selection])}
                                         moveRangeOnFirstSelection={false}
@@ -155,8 +185,7 @@ export default function ReservationRoom() {
 
                                         minDate={addDays(new Date(), 0)}
                                         maxDate={addDays(new Date(), 90)}
-
-                                        disabledDates={[new Date(2022, (7 - 1), 31)]}
+                                        disabledDates={temporaryArray.flat()}
                                     />
                                 </div>
                                 {calendarState[0].startDate && calendarState[0].endDate &&
@@ -226,10 +255,6 @@ export default function ReservationRoom() {
                                                 setModalIsOpen(true);
                                                 setReserveModalSection('date');
                                             }}
-                                            reservedBy={doc.data().reservedBy}
-                                            reservedByUid = {doc.data().reservedByUid}
-                                            reservedTime={doc.data().reservedTime}
-                                            reservedByCurrentUser={doc.data().reservedByUid === user.uid ? true:false}
                                             reservationRoomId={reservationRoomId}
                                             currentUserObject={user}
                                         />

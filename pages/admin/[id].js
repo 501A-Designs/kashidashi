@@ -479,6 +479,7 @@ export default function AdminPannel() {
                                                         setSelectedKashidashiObject(doc);
                                                     }}
                                                     boxShadow={selectedKashidashiObject && doc.id === selectedKashidashiObject.id ? '0px 0px 10px #E8E8E8	':'none'}
+                                                    reservationRoomId={reservationRoomId && reservationRoomId}
                                                     // aboutReservedByOnClick={()=>{
                                                     //     fetchReservedByUid(doc.reservedByUid);
                                                     //     setModalIsOpen(true);
