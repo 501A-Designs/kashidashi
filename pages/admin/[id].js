@@ -490,9 +490,7 @@ export default function AdminPannel() {
                                                 <KashidashiObjectRow
                                                     key={doc.id}
                                                     docObject={doc}
-                                                    onClick={() => {
-                                                        setSelectedKashidashiObject(doc);
-                                                    }}
+                                                    onClick={() => setSelectedKashidashiObject(doc)}
                                                     boxShadow={selectedKashidashiObject && doc.id === selectedKashidashiObject.id ? '0px 0px 10px #E8E8E8	':'none'}
                                                     reservationRoomId={reservationRoomId && reservationRoomId}
                                                 />
@@ -517,7 +515,7 @@ export default function AdminPannel() {
                                                 <>
                                                     <AlignItems justifyContent={'space-between'}>
                                                         <h2>{selectedKashidashiObject.data().title}</h2>
-                                                        {selectedKashidashiObject.data().reserved ?
+                                                        {selectedKashidashiObject.data().reserved || reservedUserId && reservedUserId.docs.length > 0 ?
                                                             <div
                                                                 style={{
                                                                     backgroundColor: 'var(--accentColor)',
@@ -652,7 +650,49 @@ export default function AdminPannel() {
                                                                 )
                                                             })
                                                             }
-                                                        </>                      
+                                                        </>
+                                                    }
+                                                    {roomData.data().roomType === 'centralMode' &&
+                                                        <div
+                                                            style={{
+                                                                backgroundColor:'#f0f0f0',
+                                                                borderRadius: '15px',
+                                                                padding: '1em',
+                                                                display: 'grid',
+                                                                gridTemplateColumns:'1fr',
+                                                                gap: '2px',
+                                                                marginTop: '1em'
+                                                            }}
+                                                        >
+                                                            <div>
+                                                                <h3 style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedBy}</h3>
+                                                                <p style={{margin:0,padding:0}}>{selectedKashidashiObject.data().reservedByEmail}</p>
+                                                            </div>
+                                                            <div
+                                                                style={{
+                                                                    borderRadius:'10px 10px 0px 0px',
+                                                                    backgroundColor:'white',
+                                                                    padding:'1em',
+                                                                    marginTop: '1em'
+                                                                }}
+                                                            >
+                                                                <TimeLine icon={<FiCheck/>}>
+                                                                    予約日時：{selectedKashidashiObject.data().reservedTime}
+                                                                </TimeLine>
+                                                            </div>
+                                                            <div
+                                                                style={{
+                                                                    borderRadius:'0px 0px 10px 10px',
+                                                                    backgroundColor:'white',
+                                                                    padding:'1em',
+                                                                }}
+                                                            >
+                                                                <h4 style={{margin:0}}>使用目的</h4>
+                                                                <p>
+                                                                    {/* {doc.data().reservedReason} */}
+                                                                </p>
+                                                            </div>
+                                                        </div>
                                                     }
                                                 </>:
                                                 <Nothing icon={<FiFile/>}>

@@ -25,15 +25,12 @@ import Head from 'next/head';
 
 import Modal from 'react-modal';
 import { modalStyle } from '../../lib/style/modalStyle';
-import AlignItems from '../../lib/style/AlignItems';
-import Input from '../../lib/Input';
 
 import 'react-date-range/dist/styles.css'; // main style file
 import 'react-date-range/dist/theme/default.css'; // theme css file
 import { DateRange } from 'react-date-range';
 import {ja} from 'react-date-range/dist/locale';
 import { addDays } from 'date-fns';
-
 
 import TextArea from '../../lib/TextArea';
 
@@ -58,7 +55,9 @@ export default function ReservationRoom() {
     const reviewsCollectionRef = collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/`);
     const [reservationObjects] = useCollection(reviewsCollectionRef);
     
-    const reserveKashidashiObject = async() =>{
+    const 
+    reserveKashidashiObject
+     = async() =>{
         const check = confirm(`本当に借りますか？`);
         if (check) {            
             let timeNow = moment().format('MMMM Do YYYY, h:mm a');
@@ -77,13 +76,15 @@ export default function ReservationRoom() {
                 title:reserveModalObject.data().title,
                 place:reserveModalObject.data().place,
                 due:reserveModalObject.data().due,
-
+    
                 reservedTime:timeNow,
                 reservedRoomId:reservationRoomId,
                 reservedSlotStart:calendarState[0].startDate,
                 reservedSlotEnd:calendarState[0].endDate,
                 reservedReason:reservationReasonInput,
             });
+            setModalIsOpen(false);
+            setReservationReasonInput('');
         }else{
             alert("予約をキャンセルしました。")
         }
@@ -119,7 +120,6 @@ export default function ReservationRoom() {
         return datesFormatedArray;
     }
     
-    const [disabledDatesArray, setDisabledDatesArray] = useState();
     const [reservedUserId] = useCollection(collection(db, `rooms/${reservationRoomId && reservationRoomId}/reservationObjects/${reserveModalObject.id}/reservedUser/`));
     
     let temporaryArray = [];
@@ -128,11 +128,6 @@ export default function ReservationRoom() {
             betweenDatesArray(doc.data().reservedSlotStart.toDate().toDateString(),doc.data().reservedSlotEnd.toDate().toDateString())
         )
     })
-    
-    // useEffect(() => {        
-    //     console.log(temporaryArray.flat())
-    //     setDisabledDatesArray(temporaryArray)
-    // },[reserveModalObject && temporaryArray])
 
     return (
         <>
@@ -210,7 +205,10 @@ export default function ReservationRoom() {
                                 <Button
                                     accentColor={true}
                                     icon={<FiBookmark/>}
-                                    onClick={() => reserveKashidashiObject()}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        reserveKashidashiObject();
+                                    }}
                                 >
                                     予約
                                 </Button>
