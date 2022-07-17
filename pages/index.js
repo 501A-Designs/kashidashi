@@ -16,6 +16,8 @@ import {isBrowser} from 'react-device-detect';
 import Footer from '../lib/Footer';
 import Link from 'next/link';
 
+import { useMediaQuery } from 'react-responsive'
+
 export default function Home() {
   const router = useRouter();
 
@@ -37,6 +39,9 @@ export default function Home() {
     alignItems: 'center',
     justifyContent: 'center',
   }
+
+  const isSmallScreen = useMediaQuery({ query: '(max-width: 1000px)' });
+
   
   return (
     <>
@@ -63,10 +68,8 @@ export default function Home() {
               <h3 style={{margin:0,color:'#777777'}}>貸出しの管理をもっとシンプルに。</h3>
             </AlignItems>
           </div>
-          <AlignItems>
-            {isBrowser &&
-              <Button accentColor={true} icon={<FiLogIn/>} onClick={()=>signInWithGoogle()}>Googleでログイン</Button>
-            }
+          <AlignItems flexDirection={isSmallScreen ? 'column':'row'}>
+            <Button accentColor={true} icon={<FiLogIn/>} onClick={()=>signInWithGoogle()}>Googleでログイン</Button>
             <Button icon={<FiBookOpen/>} onClick={()=>router.push('/about')}>Kashidashiについて</Button>
           </AlignItems>
         </AlignItems>

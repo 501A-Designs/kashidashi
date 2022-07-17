@@ -1,5 +1,5 @@
 import { useRouter } from 'next/router';
-import React,{useEffect, useState} from 'react'
+import React,{useState} from 'react'
 
 import Header from '../../lib/Header'
 import DispenseKashidashiObject from '../../lib/DispenseKashidashiObject'
@@ -95,7 +95,7 @@ export default function ReservationRoom() {
     const [calendarState, setCalendarState] = useState([
         {
           startDate: new Date(),
-          endDate: addDays(new Date(), 2),
+          endDate: addDays(new Date(), 1),
           key: 'selection'
         }
     ]);
@@ -165,8 +165,8 @@ export default function ReservationRoom() {
                                 <div
                                     style={{
                                         border: '2px solid #f0f0f0',
-                                        padding: '1em',
-                                        borderRadius: '10px',
+                                        padding: `${isSmallScreen ? '0px':'1em'}`,
+                                        borderRadius: `${isSmallScreen ? '0px':'10px'}`,
                                     }}
                                     >
                                     <DateRange
@@ -201,16 +201,18 @@ export default function ReservationRoom() {
                                     value={reservationReasonInput}
                                     onChange={(e) => setReservationReasonInput(e.target.value)}
                                 />
-                                <Button
-                                    accentColor={true}
-                                    icon={<FiBookmark/>}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        reserveKashidashiObject();
-                                    }}
-                                >
-                                    予約
-                                </Button>
+                                {reservationReasonInput &&
+                                    <Button
+                                        accentColor={true}
+                                        icon={<FiBookmark/>}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            reserveKashidashiObject();
+                                        }}
+                                    >
+                                        予約
+                                    </Button>
+                                }
                             </>
                         }
                         </form>
@@ -226,7 +228,7 @@ export default function ReservationRoom() {
                                         icon={<FiHome/>}
                                         onClick={() => {router.push('/app')}}
                                     >
-                                        Dashboardに戻る
+                                        {!isSmallScreen && 'Dashboardに戻る'}
                                     </Button>
                                 }
                                 {roomData.data().admin === user.uid && 
@@ -236,7 +238,7 @@ export default function ReservationRoom() {
                                             onClick={()=>router.push(`/admin/${reservationRoomId}`)}
                                             accentColor={true}
                                         >
-                                            アドミンとして編集
+                                            {!isSmallScreen && 'アドミンとして編集'}
                                         </Button>
                                     </>
                                 }

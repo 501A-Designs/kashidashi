@@ -24,9 +24,10 @@ import Nothing from '../../lib/scene/Nothing';
 import IconBanner from '../../lib/scene/IconBanner';
 import Head from 'next/head';
 
-
 import moment from 'moment';
 import 'moment/locale/ja'
+
+import { useMediaQuery } from 'react-responsive'
 
 export default function AdminPannel() {
     const router = useRouter();
@@ -231,6 +232,8 @@ export default function AdminPannel() {
       )
     }
     
+
+    const isSmallScreen = useMediaQuery({ query: '(max-width: 1000px)' })
 
     return (
         <>
@@ -442,7 +445,7 @@ export default function AdminPannel() {
                                     icon={<FiHome/>}
                                     onClick={() => {router.push('/app')}}
                                 >
-                                    Dashboardに戻る
+                                    {!isSmallScreen && 'Dashboardに戻る'}
                                 </Button>
                                 {roomData.data().roomType === 'dispenseMode' &&
                                     <Button
@@ -450,7 +453,7 @@ export default function AdminPannel() {
                                         onClick={() => {router.push(`/reserve/${reservationRoomId}`)}}
                                         accentColor={true}
                                     >
-                                        ユーザーとして利用
+                                        {!isSmallScreen && 'ユーザーとして利用'}
                                     </Button>
                                 }
                             </Header>
@@ -483,7 +486,8 @@ export default function AdminPannel() {
                                 <section
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: `${reservationObjects.docs.length > 0 ? '1fr 1fr':'1fr'}`,
+                                        // gridTemplateColumns: `${reservationObjects.docs.length > 0 ? '1fr 1fr':'1fr'}`,
+                                        gridTemplateColumns: `${!isSmallScreen ? '1fr 1fr':'1fr'}`,
                                         gap: '2em'
                                     }}
                                 >
